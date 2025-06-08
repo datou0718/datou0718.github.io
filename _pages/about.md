@@ -13,7 +13,7 @@ Research Interests
 Although AI and ML have advanced formidably in recent years, much of the progress remains too resource-intensive for many practical deployments. My research interests focus on bridging this gap, enhancing resource-efficiency through research in areas such as:
 - In-Memory Computing (IMC)
 - Hardware/Software Co-design
-- Emerging Non-Volatile Memory (i.e., PCM, ReRAM, FeFET)
+- Emerging Non-Volatile Memory (i.e., ReRAM, FeFET, PCM)
 - Edge AI/ML
 - Energy Efficiency
 
