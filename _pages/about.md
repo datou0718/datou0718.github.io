@@ -11,8 +11,8 @@ I'm Yi-Chun Liao (廖奕鈞), a undergraduate student in [department of Computer
 Research Interests
 ======
 Although AI and ML have advanced formidably in recent years, much of the progress remains too resource-intensive for many practical deployments. My research interests focus on bridging this gap, enhancing resource-efficiency through research in areas such as:
-- Compute-in-Memory
-- Hardware-Software Codesign
+- In-Memory Computing (IMC)
+- Hardware/Software Co-design
 - Emerging Non-Volatile Memory (i.e., PCM, ReRAM, FeFET)
 - Edge AI/ML
 - Energy Efficiency
