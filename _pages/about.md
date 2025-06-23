@@ -6,7 +6,7 @@ redirect_from:
   - /about/
   - /about.html
 ---
-I'm Yi-Chun Liao (廖奕鈞), a undergraduate student in [department of Computer Science and Information Engineering (CSIE)](https://www.csie.ntu.edu.tw//?locale=en) at [National Taiwan University (NTU)](https://www.ntu.edu.tw/english/). Recently I'm working on a project focused on realizing best-match functionality across multiple content-addressable memory (CAM) tiles under the supervision of [Prof. Sharon Hu](https://engineering.nd.edu/faculty/xiaobo-sharon-hu/) at [University of Notre Dame](https://www.nd.edu).
+I'm Yi-Chun Liao (廖奕鈞), an undergraduate student of [department of Computer Science and Information Engineering (CSIE)](https://www.csie.ntu.edu.tw//?locale=en), [National Taiwan University (NTU)](https://www.ntu.edu.tw/english/). Recently I'm working on a project focused on realizing best-match functionality across multiple content-addressable memory (CAM) tiles under the supervision of [Prof. Sharon Hu](https://engineering.nd.edu/faculty/xiaobo-sharon-hu/) at [University of Notre Dame](https://www.nd.edu).
 
 Research Interests
 ======
