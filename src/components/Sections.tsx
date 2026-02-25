@@ -208,18 +208,24 @@ export const Service: React.FC = () => (
     </section>
 );
 
-export const VisitorMap: React.FC = () => (
-    <section className="fade-in mb-8">
-        <h2>Visitors</h2>
-        <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
-            {/* Replace the href and src with your actual ClustrMaps tracking IDs */}
-            <a href="https://clustrmaps.com/site/1b7y4" title="Visit tracker" target="_blank" rel="noopener noreferrer">
-                <img
-                    src="//www.clustrmaps.com/map_v2.png?d=yY4M2I_0FfXvY6d_1Hq9l2kO9_12Gj3hU_W44O5y69k&cl=ffffff"
-                    alt="Visitor Map"
-                    style={{ borderRadius: '0.5rem', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-md)', maxWidth: '100%' }}
-                />
-            </a>
-        </div>
-    </section>
-);
+export const VisitorMap: React.FC = () => {
+    React.useEffect(() => {
+        const container = document.getElementById('map-container');
+        if (container && !document.getElementById('mapmyvisitors')) {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.id = 'mapmyvisitors';
+            script.src = "//mapmyvisitors.com/map.js?d=mo0RB99k6P3fYzjUxr00Is-1QQvHCH6gC-ZSKlyMPIQ&cl=ffffff&w=a";
+            container.appendChild(script);
+        }
+    }, []);
+
+    return (
+        <section className="fade-in mb-8">
+            <h2>Visitors</h2>
+            <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', display: 'flex', justifyContent: 'center', minHeight: '300px' }}>
+                <div id="map-container" style={{ width: '100%', maxWidth: '800px' }}></div>
+            </div>
+        </section>
+    );
+};
