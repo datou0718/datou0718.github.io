@@ -233,13 +233,18 @@ a:hover {
 }
 
 .markdown-body p {
+  margin-top: 0;
   margin-bottom: 1.25rem;
   line-height: 1.8;
   text-align: justify;
 }
 
-.markdown-body p:last-child {
-  margin-bottom: 0;
+.markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body>*:last-child {
+  margin-bottom: 0 !important;
 }
 
 .markdown-body strong {
