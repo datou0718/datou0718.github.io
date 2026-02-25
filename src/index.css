@@ -5,7 +5,7 @@
   --primary: #002147;
   /* Navy Blue */
   --primary-hover: #003c82;
-  --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+  --bg-color: #fcfcfc;
   --text-primary: #1a1f2e;
   --text-secondary: #4a5a75;
   --accent: #d4af37;
@@ -30,8 +30,8 @@
   --primary-hover: #f4d03f;
   --accent: #ffffff;
   /* White */
-  --bg-gradient: linear-gradient(135deg, #000c1f 0%, #002147 100%);
-  /* Deep Navy Gradient */
+  --bg-color: #002147;
+  /* Solid Navy */
   --text-primary: #ffffff;
   --text-secondary: #b0c4de;
   --glass-bg: rgba(0, 20, 46, 0.6);
@@ -46,7 +46,7 @@
 
 body {
   font-family: var(--font-main);
-  background: var(--bg-gradient);
+  background: var(--bg-color);
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
