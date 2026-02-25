@@ -22,7 +22,7 @@ export const ResearchInterests: React.FC = () => (
 export const Bio: React.FC = () => (
     <section className="fade-in">
         <h2>About Me</h2>
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card">
             <div className="markdown-body" style={{ fontSize: '1.1rem' }}>
                 <ReactMarkdown remarkPlugins={[remarkBreaks]}>
                     {content.bio}
@@ -41,7 +41,7 @@ export const News: React.FC = () => {
             <h2>Recent News</h2>
             <div style={{ display: 'grid', gap: '1rem' }}>
                 {typedNewsData.slice(0, visibleCount).map((item, index) => (
-                    <div key={index} className="glass-card" style={{ padding: '1.25rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                    <div key={index} className="glass-card mobile-stack" style={{ padding: '1.25rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <span style={{ fontWeight: 700, color: 'var(--primary)', minWidth: '100px' }}>{item.date}</span>
                         <span style={{ flex: 1 }}>{item.content}</span>
                     </div>
@@ -68,13 +68,13 @@ export const News: React.FC = () => {
 export const Education: React.FC = () => (
     <section className="fade-in">
         <h2>Education</h2>
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card">
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {content.education.map((item, index) => (
                     <div key={index} style={{ borderBottom: index < content.education.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.education.length - 1 ? '1.5rem' : '0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.degree}</h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{item.year}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
                         <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.institution}</p>
                         {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
@@ -88,13 +88,13 @@ export const Education: React.FC = () => (
 export const SelectedAwards: React.FC = () => (
     <section className="fade-in">
         <h2>Selected Awards</h2>
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card">
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {content.awards.map((item, index) => (
                     <div key={index} style={{ borderBottom: index < content.awards.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.awards.length - 1 ? '1.5rem' : '0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.name}</h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{item.year}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
                         <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.organization}</p>
                         {item.description && <p className="text-secondary" style={{ margin: 0 }}>{item.description}</p>}
@@ -114,7 +114,7 @@ export const Publications: React.FC = () => {
             <h2>Representative Publications</h2>
             <div style={{ display: 'grid', gap: '1rem' }}>
                 {typedPublicationsData.slice(0, visibleCount).map((pub, index) => (
-                    <div key={index} className="glass-card" style={{ padding: '2rem' }}>
+                    <div key={index} className="glass-card">
                         {pub.status && (
                             <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem', marginBottom: '0.25rem', letterSpacing: '0.02em' }}>
                                 {pub.status}
@@ -171,15 +171,15 @@ export const Publications: React.FC = () => {
 export const Teaching: React.FC = () => (
     <section className="fade-in">
         <h2>Teaching</h2>
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card">
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {content.teaching.map((item, index) => (
                     <div key={index} style={{ borderBottom: index < content.teaching.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.teaching.length - 1 ? '1.5rem' : '0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>
                                 {item.role}{item.course ? ` of ${item.course}` : ''}
                             </h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{item.years}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.years}</span>
                         </div>
                         <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
                     </div>
@@ -192,15 +192,15 @@ export const Teaching: React.FC = () => (
 export const Service: React.FC = () => (
     <section className="fade-in">
         <h2>Professional Service</h2>
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card">
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {content.service.map((item, index) => (
-                    <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: index < content.service.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.service.length - 1 ? '1.5rem' : '0' }}>
+                    <div key={index} className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: index < content.service.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.service.length - 1 ? '1.5rem' : '0', gap: '1rem' }}>
                         <div>
                             <p style={{ fontWeight: 700, margin: 0 }}>{item.role}</p>
                             <p className="text-secondary" style={{ margin: 0 }}>{item.organization}</p>
                         </div>
-                        <span style={{ fontWeight: 500 }}>{item.years}</span>
+                        <span style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>{item.years}</span>
                     </div>
                 ))}
             </div>
@@ -223,7 +223,7 @@ export const VisitorMap: React.FC = () => {
     return (
         <section className="fade-in mb-8">
             <h2>Visitors</h2>
-            <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', display: 'flex', justifyContent: 'center', minHeight: '300px' }}>
+            <div className="glass-card" style={{ textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
                 <div id="map-container" style={{ width: '100%', maxWidth: '800px' }}></div>
             </div>
         </section>

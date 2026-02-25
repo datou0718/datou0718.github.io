@@ -5,11 +5,12 @@ import { content } from '../data/content';
 const Header: React.FC = () => {
     return (
         <header className="fade-in" style={{ padding: '4rem 0 2rem' }}>
-            <div className="glass-card" style={{ padding: '3rem', display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: '0 0 200px' }}>
+            <div className="glass-card mobile-stack" style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: '0 1 200px' }}>
                     <div style={{
-                        width: '200px',
-                        height: '200px',
+                        width: '100%',
+                        maxWidth: '200px',
+                        aspectRatio: '1/1',
                         borderRadius: '1rem',
                         overflow: 'hidden',
                         boxShadow: 'var(--shadow-lg)'
@@ -25,7 +26,7 @@ const Header: React.FC = () => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 color: 'white',
-                                fontSize: '5rem',
+                                fontSize: 'clamp(2rem, 10vw, 5rem)',
                                 fontWeight: 'bold'
                             }}>
                                 {content.name.charAt(0)}
@@ -34,14 +35,14 @@ const Header: React.FC = () => {
                     </div>
                 </div>
 
-                <div style={{ flex: '1 1 400px' }}>
+                <div style={{ flex: '1 1 300px' }}>
                     <h1 style={{ margin: 0, color: 'var(--primary)' }}>
                         {content.name}
                     </h1>
                     <p className="text-secondary" style={{ fontSize: '1.25rem', fontWeight: 500, margin: '0.5rem 0 1rem' }}>
                         {content.title}
                     </p>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
+                    <p className="header-contact" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
                         <a href={`mailto:${content.email}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -51,7 +52,7 @@ const Header: React.FC = () => {
                         </a>
                     </p>
 
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div className="header-links" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                         {content.cv && (
                             <a href={content.cv} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem' }}>
                                 CV

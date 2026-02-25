@@ -70,6 +70,7 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 1.5rem;
   box-shadow: var(--shadow);
+  padding: 2rem;
 }
 
 /* Typography Helpers */
@@ -177,6 +178,11 @@ a:hover {
   color: var(--text-secondary);
 }
 
+.header-links {
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
 .mt-4 {
   margin-top: 1rem;
 }
@@ -186,17 +192,105 @@ a:hover {
 }
 
 /* Responsive Adjustments */
+@media (max-width: 1024px) {
+  :root {
+    --container-width: 90%;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+}
+
 @media (max-width: 768px) {
+  :root {
+    --container-width: 100%;
+    --section-padding: 3rem 1rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-align: center !important;
+  }
+
   h1 {
     font-size: 2.2rem;
   }
 
   h2 {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
+    margin-top: 2rem;
   }
 
-  :root {
-    --section-padding: 3rem 1rem;
+  .glass-card {
+    padding: 1.5rem;
+    /* Tablet/Mobile default */
+  }
+
+  /* Center Research Interests tags */
+  section h2+ul {
+    justify-content: center !important;
+  }
+
+  /* Helper to stack flex items on mobile */
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 1.5rem !important;
+  }
+
+  /* Specific fix for News/Publications dates/labels */
+  .mobile-stack>* {
+    width: 100% !important;
+    min-width: unset !important;
+    text-align: center !important;
+  }
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .header-contact,
+  .header-links {
+    justify-content: center !important;
+  }
+
+  /* Center headshot container when stacked */
+  .mobile-stack>div:first-child>div {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+
+  h1,
+  h2,
+  h3 {
+    text-align: center !important;
+  }
+
+  h2 {
+    margin-top: 1.5rem;
+  }
+
+  .glass-card {
+    padding: 1rem !important;
+    border-radius: 1rem;
+  }
+
+  .btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.9rem;
   }
 }
 
@@ -246,6 +340,15 @@ a:hover {
 
 .markdown-body>*:last-child {
   margin-bottom: 0 !important;
+}
+
+@media (max-width: 480px) {
+  .theme-toggle {
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 2.8rem !important;
+    height: 2.8rem !important;
+  }
 }
 
 .markdown-body strong {

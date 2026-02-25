@@ -49,7 +49,7 @@ const App: React.FC = () => {
       <div className="container" style={{ paddingBottom: '5rem' }}>
         <button
           onClick={toggleTheme}
-          className="glass-card btn"
+          className="glass-card btn theme-toggle"
           style={{
             position: 'fixed',
             top: '1.5rem',
@@ -58,12 +58,13 @@ const App: React.FC = () => {
             zIndex: 100,
             cursor: 'pointer',
             borderRadius: '50%',
-            width: '3rem',
-            height: '3rem',
+            width: '3.2rem',
+            height: '3.2rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--primary)'
+            color: 'var(--primary)',
+            boxShadow: 'var(--shadow-lg)'
           }}
           aria-label="Toggle Theme"
         >

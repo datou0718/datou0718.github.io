@@ -33,8 +33,8 @@ const PostsList: React.FC = () => {
     return (
         <div className="fade-in" style={{ padding: '4rem 0 2rem' }}>
             <section>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1 style={{ margin: 0, color: 'var(--primary)', fontSize: '2.5rem' }}>Posts</h1>
+                <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
+                    <h1 className="mobile-hide" style={{ margin: 0, color: 'var(--primary)', fontSize: '2.5rem' }}>Posts</h1>
                     <Link to="/" className="glass-card btn" style={{ padding: '0.5rem 1.25rem', fontWeight: 600, borderRadius: '0.75rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m15 18-6-6 6-6" />
