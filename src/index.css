@@ -219,7 +219,7 @@ a:hover {
   h1,
   h2,
   h3 {
-    text-align: center !important;
+    text-align: justify !important;
   }
 
   h1 {
@@ -229,6 +229,12 @@ a:hover {
   h2 {
     font-size: 1.6rem;
     margin-top: 2rem;
+  }
+
+  /* Specific header centering overrides */
+  .mobile-stack h1,
+  .mobile-stack p.text-secondary {
+    text-align: center !important;
   }
 
   .glass-card {
@@ -244,16 +250,16 @@ a:hover {
   /* Helper to stack flex items on mobile */
   .mobile-stack {
     flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    gap: 1.5rem !important;
+    align-items: flex-start !important;
+    text-align: justify !important;
+    gap: 0.5rem !important;
   }
 
   /* Specific fix for News/Publications dates/labels */
   .mobile-stack>* {
     width: 100% !important;
     min-width: unset !important;
-    text-align: center !important;
+    text-align: justify !important;
   }
 
   .mobile-hide {
@@ -276,11 +282,17 @@ a:hover {
   h1,
   h2,
   h3 {
-    text-align: center !important;
+    text-align: justify !important;
   }
 
   h2 {
     margin-top: 1.5rem;
+  }
+
+  /* Specific header centering overrides for narrow mobile */
+  .mobile-stack h1,
+  .mobile-stack p.text-secondary {
+    text-align: center !important;
   }
 
   .glass-card {
