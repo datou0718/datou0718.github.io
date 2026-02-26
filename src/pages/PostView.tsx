@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
+import rehypeSlug from 'rehype-slug';
 
 interface PostMeta {
     id: string;
@@ -41,6 +42,22 @@ const PostView: React.FC = () => {
                 const text = await response.text();
                 setContent(text);
                 setLoading(false);
+
+                // After content loads, wait a tick for ReactMarkdown to render and then scroll
+                setTimeout(() => {
+                    const fullHash = window.location.hash; // e.g. "#/posts/application_sharing#前言"
+                    const hashParts = fullHash.split('#');
+                    if (hashParts.length >= 3) {
+                        const targetId = hashParts.slice(2).join('#'); // Everything after the second #
+                        try {
+                            const decodedId = decodeURIComponent(targetId);
+                            const element = document.getElementById(decodedId);
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        } catch (err) { }
+                    }
+                }, 100);
             } catch (err: any) {
                 console.error("Error loading post:", err);
                 setError(err.message || "An error occurred");
@@ -85,7 +102,38 @@ const PostView: React.FC = () => {
                     fontSize: '1.1rem',
                     backgroundColor: 'transparent'
                 }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                        rehypePlugins={[rehypeSlug]}
+                        components={{
+                            a: ({ node, href, children, ...props }) => {
+                                if (href && href.startsWith('#')) {
+                                    return (
+                                        <a
+                                            href={href}
+                                            {...(props as any)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                // Create a valid selector. Try decoding in case the href is URL encoded.
+                                                let targetId = href.substring(1);
+                                                try {
+                                                    targetId = decodeURIComponent(targetId);
+                                                } catch (err) { }
+
+                                                const element = document.getElementById(targetId);
+                                                if (element) {
+                                                    element.scrollIntoView({ behavior: 'smooth' });
+                                                }
+                                            }}
+                                        >
+                                            {children}
+                                        </a>
+                                    );
+                                }
+                                return <a href={href} {...(props as any)}>{children}</a>;
+                            }
+                        }}
+                    >
                         {content}
                     </ReactMarkdown>
                 </div>
