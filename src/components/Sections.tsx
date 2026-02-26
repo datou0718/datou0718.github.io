@@ -39,13 +39,15 @@ export const News: React.FC = () => {
     return (
         <section className="fade-in">
             <h2>Recent News</h2>
-            <div style={{ display: 'grid', gap: '1rem' }}>
-                {typedNewsData.slice(0, visibleCount).map((item, index) => (
-                    <div key={index} className="glass-card mobile-stack" style={{ padding: '1.25rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--primary)', minWidth: '100px' }}>{item.date}</span>
-                        <span style={{ flex: 1 }}>{item.content}</span>
-                    </div>
-                ))}
+            <div className="glass-card">
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    {typedNewsData.slice(0, visibleCount).map((item, index) => (
+                        <div key={index} className="mobile-stack" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderBottom: index < typedNewsData.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < typedNewsData.slice(0, visibleCount).length - 1 ? '1.5rem' : '0' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--primary)', minWidth: '110px', fontSize: '1.05rem' }}>{item.date}</span>
+                            <span style={{ flex: 1, fontSize: '1.1rem' }}>{item.content}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
             {visibleCount < typedNewsData.length && (
                 <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
@@ -112,42 +114,44 @@ export const Publications: React.FC = () => {
     return (
         <section className="fade-in">
             <h2>Representative Publications</h2>
-            <div style={{ display: 'grid', gap: '1rem' }}>
-                {typedPublicationsData.slice(0, visibleCount).map((pub, index) => (
-                    <div key={index} className="glass-card">
-                        {pub.status && (
-                            <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem', marginBottom: '0.25rem', letterSpacing: '0.02em' }}>
-                                {pub.status}
+            <div className="glass-card">
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    {typedPublicationsData.slice(0, visibleCount).map((pub, index) => (
+                        <div key={index} style={{ borderBottom: index < typedPublicationsData.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < typedPublicationsData.slice(0, visibleCount).length - 1 ? '1.5rem' : '0' }}>
+                            {pub.status && (
+                                <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem', marginBottom: '0.25rem', letterSpacing: '0.02em' }}>
+                                    {pub.status}
+                                </div>
+                            )}
+                            <h3 style={{ marginBottom: '0.5rem' }}>{pub.title}</h3>
+                            <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>
+                                {pub.authors.map((a, i) => (
+                                    <span key={i} style={{ fontWeight: a === "Yi-Chun Liao" ? 700 : 400 }}>
+                                        {a}{i < pub.authors.length - 1 ? ', ' : ''}
+                                    </span>
+                                ))}
+                            </p>
+                            <p className="text-secondary" style={{ fontStyle: 'italic', marginBottom: '1rem' }}>
+                                {pub.venue}, {pub.year}
+                            </p>
+
+                            <details style={{ marginBottom: '1rem', cursor: 'pointer' }}>
+                                <summary style={{ fontWeight: 600, color: 'var(--primary)' }}>Abstract</summary>
+                                <p style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.05)', borderRadius: '0.5rem' }}>{pub.abstract}</p>
+                            </details>
+
+                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                                {pub.links.paper && <a href={pub.links.paper} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Paper</a>}
+                                {pub.links.github && <a href={pub.links.github} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Github</a>}
+                                {pub.links.arxiv && <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Arxiv</a>}
+                                {pub.links.ieee && <a href={pub.links.ieee} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>IEEE</a>}
+                                {pub.links.acm && <a href={pub.links.acm} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>ACM</a>}
+                                {pub.links.code && <a href={pub.links.code} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Code</a>}
+                                {pub.links.pdf && <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>PDF</a>}
                             </div>
-                        )}
-                        <h3 style={{ marginBottom: '0.5rem' }}>{pub.title}</h3>
-                        <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>
-                            {pub.authors.map((a, i) => (
-                                <span key={i} style={{ fontWeight: a === "Yi-Chun Liao" ? 700 : 400 }}>
-                                    {a}{i < pub.authors.length - 1 ? ', ' : ''}
-                                </span>
-                            ))}
-                        </p>
-                        <p className="text-secondary" style={{ fontStyle: 'italic', marginBottom: '1rem' }}>
-                            {pub.venue}, {pub.year}
-                        </p>
-
-                        <details style={{ marginBottom: '1rem', cursor: 'pointer' }}>
-                            <summary style={{ fontWeight: 600, color: 'var(--primary)' }}>Abstract</summary>
-                            <p style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.05)', borderRadius: '0.5rem' }}>{pub.abstract}</p>
-                        </details>
-
-                        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-                            {pub.links.paper && <a href={pub.links.paper} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Paper</a>}
-                            {pub.links.github && <a href={pub.links.github} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Github</a>}
-                            {pub.links.arxiv && <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Arxiv</a>}
-                            {pub.links.ieee && <a href={pub.links.ieee} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>IEEE</a>}
-                            {pub.links.acm && <a href={pub.links.acm} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>ACM</a>}
-                            {pub.links.code && <a href={pub.links.code} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Code</a>}
-                            {pub.links.pdf && <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>PDF</a>}
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
             {visibleCount < typedPublicationsData.length && (
                 <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
@@ -177,11 +181,12 @@ export const Teaching: React.FC = () => (
                     <div key={index} style={{ borderBottom: index < content.teaching.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.teaching.length - 1 ? '1.5rem' : '0' }}>
                         <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>
-                                {item.role}{item.course ? ` of ${item.course}` : ''}
+                                {item.course}
                             </h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.years}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
-                        <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
+                        <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.institution}</p>
+                        {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
                     </div>
                 ))}
             </div>
@@ -209,22 +214,63 @@ export const Service: React.FC = () => (
 );
 
 export const VisitorMap: React.FC = () => {
+    const [mapKey, setMapKey] = React.useState(0);
+    const [currentTheme, setCurrentTheme] = React.useState(document.documentElement.getAttribute('data-theme') || 'light');
+
+    React.useEffect(() => {
+        let timeoutId: any;
+        const handleResize = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                setMapKey(prev => prev + 1);
+            }, 1000);
+        };
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'data-theme') {
+                    const newTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                    setCurrentTheme(newTheme);
+                    setMapKey(prev => prev + 1);
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            observer.disconnect();
+        };
+    }, []);
+
     React.useEffect(() => {
         const container = document.getElementById('map-container');
-        if (container && !document.getElementById('mapmyvisitors')) {
+        if (container) {
+            container.innerHTML = '';
+            const oldScript = document.getElementById('mapmyvisitors');
+            if (oldScript) oldScript.remove();
+
+            const isDark = currentTheme === 'dark';
+            const landColor = isDark ? 'd4af37' : '002147';
+            const oceanColor = isDark ? '001938' : 'fefefe';
+            const textColor = isDark ? 'ffffff' : '002147';
+            const dotColor = isDark ? 'ffffff' : 'd4af37';
+
             const script = document.createElement('script');
             script.type = 'text/javascript';
             script.id = 'mapmyvisitors';
-            script.src = "//mapmyvisitors.com/map.js?d=mo0RB99k6P3fYzjUxr00Is-1QQvHCH6gC-ZSKlyMPIQ&cl=ffffff&w=a";
+            script.src = `//mapmyvisitors.com/map.js?d=mo0RB99k6P3fYzjUxr00Is-1QQvHCH6gC-ZSKlyMPIQ&cl=${landColor}&w=a&co=${oceanColor}&ct=${textColor}&t=tt&cmn=${dotColor}&cmo=${dotColor}`;
             container.appendChild(script);
         }
-    }, []);
+    }, [mapKey, currentTheme]);
 
     return (
         <section className="fade-in mb-8">
             <h2>Visitors</h2>
-            <div className="glass-card" style={{ textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
-                <div id="map-container" style={{ width: '100%', maxWidth: '800px' }}></div>
+            <div className="glass-card" style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', padding: 0, overflow: 'hidden' }}>
+                <div id="map-container" style={{ width: '100%' }}></div>
             </div>
         </section>
     );

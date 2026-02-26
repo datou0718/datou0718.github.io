@@ -56,6 +56,11 @@ body {
   overflow-y: scroll;
 }
 
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
 .container {
   max-width: var(--container-width);
   margin: 0 auto;
@@ -93,6 +98,7 @@ h2 {
   margin-top: 3rem;
   margin-bottom: 1.5rem;
   color: var(--primary);
+  display: inline-block;
 }
 
 h3 {
@@ -235,6 +241,16 @@ a:hover {
   .mobile-stack h1,
   .mobile-stack p.text-secondary {
     text-align: center !important;
+  }
+
+  .mobile-stack h1 span {
+    display: inline-block;
+  }
+
+  @media (max-width: 400px) {
+    .mobile-stack h1 span {
+      display: block !important;
+    }
   }
 
   .glass-card {
@@ -465,4 +481,28 @@ a:hover {
 
 [data-theme='dark'] .markdown-body th {
   background: rgba(255, 255, 255, 0.03);
+}
+
+/* Visitor Map Polishes */
+#mapmyvisitors-widget>div>div:first-child {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  padding-top: 2.25rem !important;
+  padding-bottom: 0.5rem !important;
+  font-family: var(--font-heading) !important;
+  color: var(--primary) !important;
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  #mapmyvisitors-widget>div>div:first-child {
+    padding-top: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #mapmyvisitors-widget>div>div:first-child {
+    padding-top: 1rem !important;
+  }
 }

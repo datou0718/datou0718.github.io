@@ -37,10 +37,10 @@ export interface Publication {
 }
 
 export interface TeachingItem {
-  role: string;
   course: string;
   institution: string;
-  years: string;
+  year: string;
+  details?: string;
 }
 
 export interface ServiceItem {
@@ -96,10 +96,10 @@ export const content = {
   ] as AwardItem[],
   teaching: [
     {
-      role: "Teaching Assistant",
-      course: "Computer Architecture",
+      course: "CSIE3340 Computer Architecture",
       institution: "National Taiwan University",
-      years: "2024"
+      year: "2024",
+      details: "Undergraduate Teaching Assistant"
     }
   ] as TeachingItem[],
   service: [

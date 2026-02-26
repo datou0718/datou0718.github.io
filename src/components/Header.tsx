@@ -36,8 +36,9 @@ const Header: React.FC = () => {
                 </div>
 
                 <div style={{ flex: '1 1 300px' }}>
-                    <h1 style={{ margin: 0, color: 'var(--primary)' }}>
-                        {content.name}
+                    <h1 style={{ margin: 0, color: 'var(--primary)', lineHeight: 1.2 }}>
+                        <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>Yi-Chun Liao</span>{' '}
+                        <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>(廖奕鈞)</span>
                     </h1>
                     <p className="text-secondary" style={{ fontSize: '1.25rem', fontWeight: 500, margin: '0.5rem 0 1rem' }}>
                         {content.title}
