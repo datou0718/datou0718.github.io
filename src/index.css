@@ -412,7 +412,8 @@ a:hover {
 .markdown-body blockquote {
   margin: 1.5rem 0;
   padding: 1rem;
-  border-left: 4px solid var(--primary); /* Use primary instead of accent/gold */
+  border-left: 4px solid var(--primary);
+  /* Use primary instead of accent/gold */
   background: rgba(0, 0, 0, 0.05);
   border-radius: 0 0.5rem 0.5rem 0;
   color: var(--text-secondary);
@@ -420,13 +421,18 @@ a:hover {
   align-items: center;
 }
 
-.markdown-body blockquote > p {
+.markdown-body blockquote>p {
   margin-bottom: 0;
 }
 
 [data-theme='dark'] .markdown-body blockquote {
   background: rgba(255, 255, 255, 0.05);
-  border-left-color: var(--accent); /* Optional: keep gold border in dark mode or change it to match */
+  border-left-color: var(--primary);
+  color: var(--primary);
+}
+
+[data-theme='dark'] .markdown-body blockquote>p {
+  color: var(--primary);
 }
 
 .markdown-body pre {
