@@ -60,7 +60,7 @@ export const content = {
     scholar: "https://scholar.google.com/citations?user=n7W1nP8AAAAJ&hl=en",
     linkedin: "https://www.linkedin.com/in/yi-chun-liao-07b414269/",
   },
-  bio: "I am an upcoming Ph.D. student fascinated by the potential of in-memory computing. My recent works focus on co-designing hardware/software to practicalize the applications of content-addressable memory (CAM), including capacity reduction (tree-based model inference), hardware constraint mitigation, and capability enhancement (CAM-based RAG). It is my honor to have worked with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), Prof. [Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/), and Prof. [Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
+  bio: "I am an upcoming Ph.D. student fascinated by the potential of in-memory computing. My recent works focus on co-designing hardware/software to practicalize the applications of content-addressable memory (CAM), including capacity reduction (tree-based model inference), hardware constraint mitigation, and capability enhancement (CAM-based RAG). It is my honor to have worked with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/), and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
   researchInterests: [
     "In-Memory Computing",
     "Machine Learning",
