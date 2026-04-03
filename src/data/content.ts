@@ -51,7 +51,7 @@ export interface ServiceItem {
 
 export const content = {
   name: "Yi-Chun Liao (廖奕鈞)",
-  title: "Upcoming Ph.D. Student",
+  title: "Incoming Ph.D. Student",
   email: "ycliao718@gmail.com",
   headshot: "/assets/me.jpg", // e.g., "/assets/headshot.jpg"
   cv: "/assets/CV.pdf", // e.g., "/assets/CV.pdf"
@@ -60,7 +60,7 @@ export const content = {
     scholar: "https://scholar.google.com/citations?user=n7W1nP8AAAAJ&hl=en",
     linkedin: "https://www.linkedin.com/in/yi-chun-liao-07b414269/",
   },
-  bio: "I am an upcoming Ph.D. student fascinated by the potential of in-memory computing. My recent works focus on co-designing hardware/software to practicalize the applications of content-addressable memory (CAM), including capacity reduction (tree-based model inference), hardware constraint mitigation, and capability enhancement (CAM-based RAG). It is my honor to have worked with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/), and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
+  bio: "I am an incoming Ph.D. student at [Duke Center for Computational Evolutionary Intelligence (CEI)](https://cei.pratt.duke.edu/), where I will continue exploring in-memory computing through hardware/software co-design. My recent works focus on accelerating various applications with content-addressable memory (CAM), including tree-based machine learning and retrieval-augmented generation. It is my honor to have worked with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/), and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
   researchInterests: [
     "In-Memory Computing",
     "Machine Learning",
@@ -68,6 +68,12 @@ export const content = {
   ],
   education: [
     {
+      degree: "Ph.D. in Electrical and Computer Engineering",
+      institution: "Duke University",
+      year: "2026-",
+      details: "Center for Computational Evolutionary Intelligence (CEI)",
+    }
+    , {
       degree: "B.Sc. in Computer Science and Information Engineering",
       institution: "National Taiwan University",
       year: "2021-2026",
