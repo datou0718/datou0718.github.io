@@ -39,7 +39,7 @@ Cornell ECE PhD
 Georgia Tech CS PhD
 
 ## 申請背景
-
+```
 ### Education
 NTU CSIE 2021-2026 (GPA: 3.90/4.30, 3.73/4.00)
 
@@ -70,7 +70,7 @@ TOEFL: 112 (R29, L28, S28, W27)
 ### Letter of Recommendations
 Academia Sinica / NTU Research Advisors ×2
 University of Notre Dame Research Advisor ×1
-
+```
 ## 旅程開始之前...
 
 ### 為什麼要讀PhD？
