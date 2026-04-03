@@ -23,53 +23,53 @@
 嗨！我是廖奕鈞，在連兩年美國研究經費大砍的情況下我很幸運能申請上一些學校，並決定從Fall 2026開始加入Duke ECE就讀PhD。會想寫這篇主要是因為網路上的資訊較為零散，很多資源是我誤打誤撞或和許多人聊聊之後才發現的，因此想藉由這個機會感謝大家的幫助與支持，並彙整我所知道的資訊與感想，讓你的申請之路更加順利！
 
 ## 申請結果
+```
+[Admission]
+- Purdue ECE PhD (interviewed 2/7, accepted 2/18)
+- Duke ECE PhD (interviewed 10/24, 2/16, accepted 3/2)
+- Notre Dame CSE PhD (verbal offer from intern advisor)
 
-### Admission
-Purdue ECE PhD (interviewed 2/7, accepted 2/18)
-Duke ECE PhD (interviewed 10/24, 2/16, accepted 3/2)
-Notre Dame CSE PhD (verbal offer from intern advisor)
+[Rejection]
+- MIT EECS PhD (rejected 3/10)
+- Michigan ECE PhD (rejected 3/27)
+- UIUC ECE PhD (rejected 4/1)
 
-### Rejection
-MIT EECS PhD (rejected 3/10)
-Michigan ECE PhD (rejected 3/27)
-UIUC ECE PhD (rejected 4/1)
-
-### Pending
-Cornell ECE PhD
-Georgia Tech CS PhD
-
+[Pending]
+- Cornell ECE PhD
+- Georgia Tech CS PhD
+```
 ## 申請背景
 ```
-### Education
-NTU CSIE 2021-2026 (GPA: 3.90/4.30, 3.73/4.00)
+[Education]
+- NTU CSIE 2021-2026 (GPA: 3.90/4.30, 3.73/4.00)
 
-### Research Experience
-Academia Sinica (2023-2024, 1 year)
-Academia Sinica / NTU (2024-, 1 year 9 months)
-University of Notre Dame (2025-, 8 months)
+[Research Experience]
+- Academia Sinica (2023-2024, 1 year)
+- Academia Sinica / NTU (2024-, 1 year 9 months)
+- University of Notre Dame (2025-, 8 months)
 
-### Publications
-1 first-authored conference short paper
-1 first-authored journal paper (under review)
-1 n-authored conference paper
+[Publications]
+- first-authored conference short paper ×1
+- first-authored journal paper (under review) ×1
+- n-authored conference paper ×1
 
-### Honors and Awards
-First Place of NTU Bachelor Thesis Award
-First Place of MakeNTU 2024 AUO Enterprise Award
-Irving T. Ho Memorial Scholarship
-Dean's List Award
+[Honors and Awards]
+- First Place of NTU Bachelor Thesis Award
+- First Place of MakeNTU 2024 AUO Enterprise Award
+- Irving T. Ho Memorial Scholarship
+- Dean's List Award
 
-### Other Experience
-TA of NTU CSIE Computer Architecture
-President of NTU CSIE Student Association
-President of NTU Cancer Children Service Club
+[Other Experience]
+- TA of NTU CSIE Computer Architecture
+- President of NTU CSIE Student Association
+- President of NTU Cancer Children Service Club
 
-### Test Score
-TOEFL: 112 (R29, L28, S28, W27)
+[Test Score]
+- TOEFL: 112 (R29, L28, S28, W27)
 
-### Letter of Recommendations
-Academia Sinica / NTU Research Advisors ×2
-University of Notre Dame Research Advisor ×1
+[Letter of Recommendations]
+- Academia Sinica / NTU Research Advisors ×2
+- University of Notre Dame Research Advisor ×1
 ```
 ## 旅程開始之前...
 
@@ -86,7 +86,7 @@ University of Notre Dame Research Advisor ×1
 
 > Connection >> Publication >> Application Document >> GPA >> Other
 
-接下來我會從我的觀點分享如何準備以提升錄取機會。雖然文章有點長，但我有盡量按照準備的時序排列，你可以準備到哪個環節就看對應的段落。**其他想說的話是比較general但任何時期都適用的，有興趣可以先跳過去。**
+接下來我會從我的觀點分享如何準備以提升錄取機會。雖然文章有點長，但我有盡量按照準備的時序排列，你可以準備到哪個環節就看對應的段落。
 
 ### 累積研究實力與Connection
 
