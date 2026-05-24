@@ -52,7 +52,7 @@ export interface ServiceItem {
 export const content = {
   name: "Yi-Chun Liao (廖奕鈞)",
   title: "Incoming Ph.D. Student",
-  email: "ycliao718@gmail.com",
+  email: "yi-chun.liao@duke.edu",
   headshot: "/assets/me.jpg", // e.g., "/assets/headshot.jpg"
   cv: "/assets/CV.pdf", // e.g., "/assets/CV.pdf"
   socials: {
