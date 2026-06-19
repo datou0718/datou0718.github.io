@@ -63,8 +63,8 @@ export const content = {
   bio: "I am an incoming Ph.D. student at [Duke Center for Computational Evolutionary Intelligence (CEI)](https://cei.pratt.duke.edu/), where I will continue exploring in-memory computing through hardware/software co-design. My recent works focus on accelerating various applications with content-addressable memory (CAM), including tree-based machine learning and retrieval-augmented generation. It is my honor to have worked with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/), and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
   researchInterests: [
     "In-Memory Computing",
-    "Machine Learning",
-    "Hardware/Software Co-Design",
+    "Computer Architecture",
+    "Algorithm/Hardware Co-Design",
   ],
   education: [
     {
