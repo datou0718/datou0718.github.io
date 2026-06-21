@@ -98,7 +98,7 @@ export const content = {
       institution: "University of Notre Dame",
       time: "2025 - ",
       location: "Notre Dame, IN",
-      details: "Advisor: Prof. Xiaobo Sharon Hu"
+      details: "Advisor: Prof. X. Sharon Hu"
     },
     {
       role: "Research Assistant",
