@@ -80,7 +80,7 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 1.5rem;
   box-shadow: var(--shadow);
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 /* Typography Helpers */
@@ -98,9 +98,13 @@ h1 {
   font-size: 3rem;
 }
 
+section {
+  margin-bottom: 3.5rem;
+}
+
 h2 {
   font-size: 2rem;
-  margin-top: 3rem;
+  margin-top: 0;
   margin-bottom: 1.5rem;
   color: var(--primary);
   display: inline-block;
@@ -239,7 +243,7 @@ a:hover {
 
   h2 {
     font-size: 1.6rem;
-    margin-top: 2rem;
+    margin-top: 0;
   }
 
   /* Specific header centering overrides */
@@ -259,7 +263,7 @@ a:hover {
   }
 
   .glass-card {
-    padding: 1.5rem;
+    padding: 1.25rem;
     /* Tablet/Mobile default */
   }
 
@@ -307,7 +311,7 @@ a:hover {
   }
 
   h2 {
-    margin-top: 1.5rem;
+    margin-top: 0;
   }
 
   /* Specific header centering overrides for narrow mobile */

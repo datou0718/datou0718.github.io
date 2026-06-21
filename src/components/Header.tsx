@@ -59,9 +59,6 @@ const Header: React.FC = () => {
                                 CV
                             </a>
                         )}
-                        <Link to="/posts" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', textDecoration: 'none' }}>
-                            Posts
-                        </Link>
                         <a href={content.socials.github} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem' }}>
                             GitHub
                         </a>
@@ -71,6 +68,14 @@ const Header: React.FC = () => {
                         <a href={content.socials.linkedin} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem' }}>
                             LinkedIn
                         </a>
+                        <Link to="/posts" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', textDecoration: 'none' }}>
+                            Posts
+                        </Link>
+                        {content.socials.instagram && (
+                            <a href={content.socials.instagram} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem' }}>
+                                Instagram
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>

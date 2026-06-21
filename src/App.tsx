@@ -10,6 +10,7 @@ import {
   // Service,
   VisitorMap,
   Education,
+  Experience,
   SelectedAwards
 } from './components/Sections';
 
@@ -24,6 +25,7 @@ const Home: React.FC = () => (
       <ResearchInterests />
       <News />
       <Education />
+      <Experience />
       <SelectedAwards />
       <Publications />
       <Teaching />

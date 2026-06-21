@@ -78,7 +78,33 @@ export const Education: React.FC = () => (
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.degree}</h3>
                             <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
-                        <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.institution}</p>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
+                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
+                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
+                        </div>
+                        {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+);
+
+export const Experience: React.FC = () => (
+    <section className="fade-in">
+        <h2>Experience</h2>
+        <div className="glass-card">
+            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                {content.experience.map((item, index) => (
+                    <div key={index} style={{ borderBottom: index < content.experience.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.experience.length - 1 ? '1.5rem' : '0' }}>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.role}</h3>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.time}</span>
+                        </div>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
+                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
+                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
+                        </div>
                         {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
                     </div>
                 ))}
@@ -98,7 +124,10 @@ export const SelectedAwards: React.FC = () => (
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.name}</h3>
                             <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
-                        <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.organization}</p>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.description ? '0.5rem' : '0', gap: '0.5rem' }}>
+                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.organization}</p>
+                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
+                        </div>
                         {item.description && <p className="text-secondary" style={{ margin: 0 }}>{item.description}</p>}
                     </div>
                 ))}
@@ -185,7 +214,10 @@ export const Teaching: React.FC = () => (
                             </h3>
                             <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
                         </div>
-                        <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{item.institution}</p>
+                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
+                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
+                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
+                        </div>
                         {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
                     </div>
                 ))}
@@ -267,7 +299,7 @@ export const VisitorMap: React.FC = () => {
     }, [mapKey, currentTheme]);
 
     return (
-        <section className="fade-in mb-8">
+        <section className="fade-in">
             <h2>Visitors</h2>
             <div className="glass-card" style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', padding: 0, overflow: 'hidden' }}>
                 <div id="map-container" style={{ width: '100%' }}></div>
