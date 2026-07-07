@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import rehypeSlug from 'rehype-slug';
+import { useLayout } from '../context/LayoutContext';
 
 interface PostMeta {
     id: string;
@@ -13,12 +13,57 @@ interface PostMeta {
     file: string;
 }
 
+// Eagerly glob import all markdown posts at compile time to prevent runtime fetch failures.
+const postsContent = import.meta.glob('../posts/*.md', { query: '?raw', import: 'default', eager: true });
+
+// Shared slugifier to ensure 100% agreement between Table of Contents links and rendered headings
+const slugify = (text: string) => {
+    return text
+        .toLowerCase()
+        // Replace spaces/tabs/newlines with hyphens
+        .replace(/\s+/g, '-')
+        // Remove non-word, non-CJK, non-hyphen chars (keep English letters, numbers, CJK, hyphens, underscores)
+        .replace(/[^\w\u4e00-\u9fa5\-\_]+/g, '')
+        // Collapse multiple hyphens
+        .replace(/-+/g, '-')
+        // Trim leading and trailing hyphens
+        .replace(/^-+|-+$/g, '');
+};
+
+// Helper to extract raw text content recursively from React nodes
+const getParagraphText = (node: any): string => {
+    if (typeof node === 'string') return node;
+    if (Array.isArray(node)) return node.map(getParagraphText).join('');
+    if (node && node.props && node.props.children) return getParagraphText(node.props.children);
+    return '';
+};
+
 const PostView: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [meta, setMeta] = useState<PostMeta | null>(null);
     const [content, setContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [headings, setHeadings] = useState<Array<{ id: string; text: string; depth: number }>>([]);
+    const [activeId, setActiveId] = useState<string>('');
+    const { setSidebarContent } = useLayout();
+
+    const parseHeadings = (text: string) => {
+        // Strip code blocks first to avoid matching headings in code
+        const strippedText = text.replace(/```[\s\S]*?```/g, '');
+        const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+        const list: Array<{ id: string; text: string; depth: number }> = [];
+        let match;
+        while ((match = headingRegex.exec(strippedText)) !== null) {
+            const depth = match[1].length;
+            // Clean up basic markdown formatting from heading text to display clean text in TOC
+            const headingText = match[2].replace(/[\*\_`#]/g, '').trim();
+            const headingId = slugify(headingText);
+            list.push({ id: headingId, text: headingText, depth });
+        }
+        return list;
+    };
 
     useEffect(() => {
         const loadPost = async () => {
@@ -35,12 +80,13 @@ const PostView: React.FC = () => {
 
                 setMeta(postMeta);
 
-                // 2. Fetch the actual markdown file from the public folder
-                const response = await fetch(`/posts/${postMeta.file}`);
-                if (!response.ok) throw new Error("Could not load markdown file");
+                // 2. Load the actual markdown file from eagerness glob import
+                const filePath = `../posts/${postMeta.file}`;
+                const text = postsContent[filePath] as string;
+                if (!text) throw new Error("Could not load markdown file from bundle");
 
-                const text = await response.text();
                 setContent(text);
+                setHeadings(parseHeadings(text));
                 setLoading(false);
 
                 // After content loads, wait a tick for ReactMarkdown to render and then scroll
@@ -68,13 +114,79 @@ const PostView: React.FC = () => {
         if (id) loadPost();
     }, [id]);
 
+    // IntersectionObserver to highlight current active heading in TOC
+    useEffect(() => {
+        if (headings.length === 0) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const visible = entries.find((entry) => entry.isIntersecting);
+                if (visible) {
+                    setActiveId(visible.target.id);
+                }
+            },
+            { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+        );
+
+        headings.forEach((h) => {
+            const el = document.getElementById(h.id);
+            if (el) observer.observe(el);
+        });
+
+        return () => {
+            headings.forEach((h) => {
+                const el = document.getElementById(h.id);
+                if (el) observer.unobserve(el);
+            });
+        };
+    }, [headings]);
+
+    // Push Table of Contents to Sidebar
+    useEffect(() => {
+        if (headings.length > 0) {
+            setSidebarContent(
+                <nav className="toc-nav">
+                    <h3>Table of Contents</h3>
+                    <ul className="toc-list">
+                        {headings.filter(h => h.depth >= 2 && h.depth <= 3).map((heading, i) => (
+                            <li key={i}>
+                                <a
+                                    href={`#${heading.id}`}
+                                    className={activeId === heading.id ? 'active' : ''}
+                                    style={{ '--depth-pad': `${Math.max(0, heading.depth - 2) * 0.75}rem` } as React.CSSProperties}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        const element = document.getElementById(heading.id);
+                                        if (element) {
+                                            element.scrollIntoView({ behavior: 'smooth' });
+                                            setActiveId(heading.id);
+                                            const hashParts = window.location.hash.split('#');
+                                            if (hashParts.length >= 2) {
+                                                window.history.pushState(null, '', `#${hashParts[1]}#${heading.id}`);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {heading.text}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+            );
+        }
+        return () => {
+            setSidebarContent(null);
+        };
+    }, [headings, activeId, setSidebarContent]);
+
     if (loading) {
-        return <div style={{ paddingTop: '8rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading post...</div>;
+        return <div style={{ paddingTop: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading post...</div>;
     }
 
     if (error || !meta) {
         return (
-            <div className="fade-in" style={{ paddingTop: '8rem', textAlign: 'center' }}>
+            <div className="fade-in" style={{ paddingTop: '4rem', textAlign: 'center' }}>
                 <h1 style={{ color: 'var(--primary)' }}>Oops!</h1>
                 <p className="text-secondary">{error || "Post not found"}</p>
                 <Link to="/posts" className="glass-card btn" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', marginTop: '2rem', textDecoration: 'none', color: 'var(--text-primary)', fontWeight: 600, borderRadius: '0.75rem' }}>
@@ -85,17 +197,8 @@ const PostView: React.FC = () => {
     }
 
     return (
-        <div className="fade-in" style={{ padding: '4rem 0 2rem' }}>
+        <div className="fade-in">
             <section>
-                <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
-                    <Link to="/posts" className="glass-card btn" style={{ padding: '0.5rem 1.25rem', fontWeight: 600, borderRadius: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                        Back to Posts
-                    </Link>
-                </div>
-
                 <div className="markdown-body" style={{
                     color: 'var(--text-primary)',
                     lineHeight: 1.8,
@@ -104,8 +207,37 @@ const PostView: React.FC = () => {
                 }}>
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkBreaks]}
-                        rehypePlugins={[rehypeSlug]}
                         components={{
+                            h1: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h1 id={id}>{children}</h1>;
+                            },
+                            h2: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h2 id={id}>{children}</h2>;
+                            },
+                            h3: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h3 id={id}>{children}</h3>;
+                            },
+                            h4: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h4 id={id}>{children}</h4>;
+                            },
+                            h5: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h5 id={id}>{children}</h5>;
+                            },
+                            h6: ({ children }) => {
+                                const text = getParagraphText(children);
+                                const id = slugify(text);
+                                return <h6 id={id}>{children}</h6>;
+                            },
                             a: ({ node, href, children, ...props }) => {
                                 if (href && href.startsWith('#')) {
                                     return (
@@ -114,7 +246,6 @@ const PostView: React.FC = () => {
                                             {...(props as any)}
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                // Create a valid selector. Try decoding in case the href is URL encoded.
                                                 let targetId = href.substring(1);
                                                 try {
                                                     targetId = decodeURIComponent(targetId);

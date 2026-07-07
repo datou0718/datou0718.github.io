@@ -12,6 +12,12 @@
   /* Gold */
   --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-border: rgba(0, 33, 71, 0.1);
+  /* Opaque approximation of --glass-bg composited over --bg-color (i.e. what
+     a glass card actually looks like once painted) — for the sticky nav,
+     which can't use backdrop-filter/true translucency (see .page-glass
+     comment) but still needs to visually match the cards around it. Keep the
+     color/percentage here in sync with --glass-bg's own rgb()/alpha. */
+  --nav-solid-bg: color-mix(in srgb, #ffffff 75%, var(--bg-color) 25%);
   --shadow: 0 4px 6px -1px rgb(0 33 71 / 0.1), 0 2px 4px -2px rgb(0 33 71 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 33 71 / 0.1), 0 4px 6px -4px rgb(0 33 71 / 0.1);
 
@@ -21,7 +27,21 @@
 
   /* Spacing */
   --section-padding: 5rem 1rem;
-  --container-width: 1024px;
+  --container-width: 1360px;
+  /* Every glass card on the page shares this one padding value — the only
+     exception is .page-glass (the outer page wrapper), which keeps its own
+     larger, independent 2rem. */
+  --glass-padding: 1rem;
+
+  /* Sidebar profile-link icon row — avatar width is derived from these so it
+     always spans exactly as wide as the icon row below it. --icon-count must
+     match the number of icons ProfileLinks renders (Sidebar.tsx). */
+  --icon-size: 2.2rem;
+  --icon-gap: 0.5rem;
+  --icon-count: 6;
+
+  /* Experience/Education/Awards/Teaching timeline icon circle */
+  --exp-icon-size: 4rem;
 }
 
 [data-theme='dark'] {
@@ -30,12 +50,19 @@
   --primary-hover: #f4d03f;
   --accent: #ffffff;
   /* White */
-  --bg-color: #002147;
-  /* Solid Navy */
+  /* Matches what --glass-bg composited over this color actually renders as
+     (see --nav-solid-bg below) — on mobile .page-glass goes fully transparent
+     (edge-to-edge look), so this raw body color shows directly in the gaps
+     around/between cards. It used to be a brighter, more saturated navy than
+     the glass cards sitting on top of it, which read as two different colors
+     on the same page — this makes the whole page one consistent dark navy,
+     as if the entire page were itself behind glass. */
+  --bg-color: #001938;
   --text-primary: #ffffff;
   --text-secondary: #b0c4de;
   --glass-bg: rgba(0, 20, 46, 0.6);
   --glass-border: rgba(212, 175, 55, 0.2);
+  --nav-solid-bg: color-mix(in srgb, rgb(0, 20, 46) 60%, var(--bg-color) 40%);
 }
 
 * {
@@ -54,6 +81,7 @@ body {
   transition: background-color 0.3s ease;
   text-align: justify;
   overflow-y: scroll;
+  scroll-padding-top: 90px;
 }
 
 ::selection {
@@ -66,21 +94,37 @@ body {
   color: #000000;
 }
 
+/* Offset headings below the sticky nav row when scrolled to via TOC */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  scroll-margin-top: 90px;
+}
+
 .container {
   max-width: var(--container-width);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0;
 }
 
 /* Glassmorphism Card Base */
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   border-radius: 1.5rem;
   box-shadow: var(--shadow);
-  padding: 1.5rem;
+  padding: var(--glass-padding);
+}
+
+
+/* Only the outermost page wrapper gets blur — nested backdrop-filter
+   creates stacking contexts that break position:sticky z-ordering */
+.page-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Typography Helpers */
@@ -99,13 +143,13 @@ h1 {
 }
 
 section {
-  margin-bottom: 3.5rem;
+  margin-bottom: 2.5rem;
 }
 
 h2 {
   font-size: 2rem;
   margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   color: var(--primary);
   display: inline-block;
 }
@@ -219,31 +263,54 @@ a:hover {
   h2 {
     font-size: 1.8rem;
   }
+
+  h3 {
+    font-size: 1.35rem;
+  }
 }
 
 @media (max-width: 768px) {
   :root {
     --container-width: 100%;
     --section-padding: 3rem 1rem;
+    --glass-padding: 0.75rem;
+    /* Smaller so the icon can stay inline next to the text (like pbb.sh) at
+       mobile widths instead of needing to stack above it, and so the text
+       column keeps as much width as possible to avoid awkward wrapping of
+       institution names. */
+    --exp-icon-size: 2.5rem;
   }
 
+  /* No horizontal padding here: .outer-padding already provides one consistent
+     edge margin for everything (mobile header, nav bar, content). Adding more
+     here made the nav bar/content sit further from the edge than the mobile
+     header, which is a direct child of .outer-padding and skips .container. */
   .container {
-    padding: 0 1rem;
+    padding: 0;
   }
 
+  /* Justify still reads fine for paragraph copy on mobile (more words per
+     line than a heading, so the gaps aren't as visible) — body text keeps
+     the base justify. Headings wrap to only a few large words per line
+     though, which produced ugly uneven gaps (worst with CJK text), so
+     those specifically stay left-aligned below. */
   h1,
   h2,
   h3 {
-    text-align: justify !important;
+    text-align: left !important;
   }
 
   h1 {
-    font-size: 2.2rem;
+    font-size: 1.7rem;
   }
 
   h2 {
-    font-size: 1.6rem;
+    font-size: 1.35rem;
     margin-top: 0;
+  }
+
+  h3 {
+    font-size: 1.1rem;
   }
 
   /* Specific header centering overrides */
@@ -262,21 +329,25 @@ a:hover {
     }
   }
 
-  .glass-card {
-    padding: 1.25rem;
-    /* Tablet/Mobile default */
-  }
+
 
   /* Center Research Interests tags */
   section h2+ul {
     justify-content: center !important;
   }
 
+  /* Smaller font/padding (overriding the inline style) so more tags fit per
+     row in the narrower mobile column instead of stacking one-per-line. */
+  section h2+ul li {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.9rem !important;
+  }
+
   /* Helper to stack flex items on mobile */
   .mobile-stack {
     flex-direction: column !important;
     align-items: flex-start !important;
-    text-align: justify !important;
+    text-align: left !important;
     gap: 0.5rem !important;
   }
 
@@ -284,7 +355,7 @@ a:hover {
   .mobile-stack>* {
     width: 100% !important;
     min-width: unset !important;
-    text-align: justify !important;
+    text-align: left !important;
   }
 
   .mobile-hide {
@@ -307,11 +378,20 @@ a:hover {
   h1,
   h2,
   h3 {
-    text-align: justify !important;
+    text-align: left !important;
+  }
+
+  h1 {
+    font-size: 1.45rem;
   }
 
   h2 {
+    font-size: 1.2rem;
     margin-top: 0;
+  }
+
+  h3 {
+    font-size: 1.05rem;
   }
 
   /* Specific header centering overrides for narrow mobile */
@@ -321,7 +401,6 @@ a:hover {
   }
 
   .glass-card {
-    padding: 1rem !important;
     border-radius: 1rem;
   }
 
@@ -362,6 +441,34 @@ a:hover {
 
 .markdown-body h3 {
   font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .markdown-body h1 {
+    font-size: 1.5rem;
+  }
+
+  .markdown-body h2 {
+    font-size: 1.25rem;
+  }
+
+  .markdown-body h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-body h1 {
+    font-size: 1.3rem;
+  }
+
+  .markdown-body h2 {
+    font-size: 1.15rem;
+  }
+
+  .markdown-body h3 {
+    font-size: 1.05rem;
+  }
 }
 
 .markdown-body p {
@@ -440,21 +547,21 @@ a:hover {
 }
 
 .markdown-body pre {
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
   color: var(--text-primary) !important;
   padding: 1.25rem;
   border-radius: 0.75rem;
   overflow-x: auto;
   margin-bottom: 1.5rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--glass-border) !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.95rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03) !important;
 }
 
 [data-theme='dark'] .markdown-body pre {
-  background: rgba(0, 0, 0, 0.3) !important;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.35) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
 .markdown-body code {
@@ -471,10 +578,10 @@ a:hover {
 }
 
 .markdown-body pre code {
-  background: transparent;
-  padding: 0;
-  color: inherit;
-  border-radius: 0;
+  background: transparent !important;
+  padding: 0 !important;
+  color: inherit !important;
+  border-radius: 0 !important;
 }
 
 .markdown-body img {
@@ -526,5 +633,1041 @@ a:hover {
 @media (max-width: 480px) {
   #mapmyvisitors-widget>div>div:first-child {
     padding-top: 1rem !important;
+  }
+}
+
+/* ==========================================================================
+   Fixed Sidebar, Columns Layout & Navigation Styles (inspired by pbb.sh)
+   ========================================================================== */
+
+.outer-padding {
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+@media (max-width: 1024px) {
+  .outer-padding {
+    padding: 1rem;
+  }
+}
+
+.layout-grid {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 2rem;
+}
+
+.sidebar-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: none;
+}
+
+.content-col {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-col {
+    display: block;
+  }
+}
+
+.sidebar-affix {
+  position: sticky;
+  /* Matches .page-nav-row.is-stuck's padding-top so the avatar's top edge
+     lines up with the top of the nav bar's text once both are stuck while scrolling. */
+  top: 1rem;
+}
+
+.sidebar-wrap {
+  width: 100%;
+}
+
+.sidebar-inner {
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+/* Avatar width is derived from the icon row below it (--icon-size/--icon-gap/
+   --icon-count) so the two can never drift out of sync again. */
+.profile-avatar {
+  width: calc(var(--icon-count) * var(--icon-size) + (var(--icon-count) - 1) * var(--icon-gap));
+  aspect-ratio: 1;
+  border-radius: 1.5rem;
+  /* Bottom margin matches .name-section's own gap, so avatar -> name -> ... ->
+     icon row is one uniform rhythm throughout. */
+  margin: 0 auto 0.5rem auto;
+  display: block;
+  object-fit: cover;
+  box-shadow: var(--shadow-lg);
+  border: none;
+}
+
+.profile-avatar-placeholder {
+  width: calc(var(--icon-count) * var(--icon-size) + (var(--icon-count) - 1) * var(--icon-gap));
+  aspect-ratio: 1;
+  border-radius: 1.5rem;
+  margin: 0 auto 0.5rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  color: white;
+  font-size: 5rem;
+  font-weight: bold;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Single uniform gap for the whole avatar -> name -> ... -> icon-row rhythm,
+   instead of a different margin-bottom per element. */
+.name-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.name-section h2 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--primary);
+  display: block;
+  text-align: center;
+}
+
+.name-section h2 span {
+  font-weight: 400;
+}
+
+.name-section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--primary);
+  margin: 0;
+  text-align: center;
+}
+
+.sidebar-title {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.sidebar-affiliation {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.social-row {
+  display: flex;
+  justify-content: center;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--icon-gap);
+  justify-content: center;
+}
+
+.social-icon-btn {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  color: var(--primary);
+  background: var(--glass-bg);
+  box-shadow: var(--shadow);
+  transition: all 0.25s ease;
+  font-size: 1.1rem;
+}
+
+.social-icon-btn:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+[data-theme='dark'] .social-icon-btn:hover {
+  background-color: var(--primary);
+  color: #002147;
+  border-color: var(--primary);
+}
+
+.contact-block {
+  text-align: left;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 1.25rem;
+  max-width: 240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.contact-item i {
+  color: var(--primary);
+  font-size: 1rem;
+  width: 1.25rem;
+  text-align: center;
+}
+
+.contact-item a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.contact-item a:hover {
+  color: var(--primary);
+}
+
+/* Table of Contents in Sidebar */
+.toc-area {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.toc-area hr {
+  border: none;
+  border-top: 1px solid var(--glass-border);
+  margin-bottom: 1.25rem;
+}
+
+.toc-nav {
+  max-height: calc(100vh - 460px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.toc-nav h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.toc-list {
+  list-style: none;
+  padding-left: 0;
+  border-left: 1px solid var(--glass-border);
+}
+
+.toc-list li {
+  margin-bottom: 0.4rem;
+}
+
+.toc-list a {
+  display: block;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  margin-left: -1px;
+  padding-left: calc(var(--depth-pad, 0rem) + 0.6rem);
+  line-height: 1.4;
+}
+
+.toc-list a:hover {
+  color: var(--primary);
+  padding-left: calc(var(--depth-pad, 0rem) + 0.9rem);
+}
+
+.toc-list a.active {
+  color: var(--primary);
+  font-weight: 700;
+  border-left-color: var(--primary);
+  padding-left: calc(var(--depth-pad, 0rem) + 0.9rem);
+}
+
+/* Sticky Navigation Tab Row */
+.page-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  /* Stick flush to the real viewport top so there's no uncovered gap above
+     the bar for scrolling content to show through (was top: 3rem, which left
+     the outer-padding + page-glass padding strip exposed once stuck). */
+  top: 0;
+  z-index: 100;
+  /* --nav-solid-bg already approximates what a translucent glass card looks
+     like once composited over the page — matches the surrounding cards
+     instead of the flatter, differently-toned --bg-color underneath them. */
+  background: var(--nav-solid-bg);
+  /* Align with content-col only — don't bleed into the sidebar column */
+  margin-left: calc(320px + 2rem);
+  /* No top padding at rest: page-glass already provides 2rem above this row,
+     matching its left/right/bottom padding. Padding-top is added only once
+     stuck (see .is-stuck below), so the resting layout stays tight while the
+     pinned bar gets equal space above and below its text. */
+  padding: 0 0 1rem 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  transition: padding-top 0.15s ease;
+}
+
+@media (min-width: 1024px) {
+  .page-nav-row.is-stuck {
+    padding-top: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .page-nav-row {
+    /* Set from MobileProfile's actual measured height (see its
+       useLayoutEffect) so this sits flush underneath it — a hardcoded guess
+       here previously undershot the real height and caused the nav row to
+       overlap/jump under the header once it became stuck while scrolling. */
+    top: var(--mobile-profile-height, 76px);
+    /* Bleeds out to the true viewport edge like .mobile-profile above it —
+       padding is bumped to 1rem (from 0.5rem) to match .outer-padding, so
+       the tabs still line up with the content below, which keeps that inset. */
+    width: calc(100% + 2rem);
+    margin-left: -1rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+.page-nav-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+}
+
+.page-nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-nav-link {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
+  height: 2.3rem;
+}
+
+.theme-toggle-nav {
+  font-size: 1.05rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
+  color: var(--primary);
+  height: 2.3rem;
+}
+
+.page-nav-link:hover {
+  background: rgba(0, 33, 71, 0.08);
+  color: var(--primary);
+}
+
+[data-theme='dark'] .page-nav-link:hover {
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--primary);
+}
+
+.page-nav-link.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .page-nav-link.active {
+  background: var(--primary);
+  color: #002147;
+}
+
+@media (max-width: 1024px) {
+  /* The mobile header (MobileProfile) already has its own theme toggle next
+     to the name, so the nav row's copy would be redundant; the page title is
+     dropped here too, leaving just the four page tabs. !important is needed
+     on .theme-toggle-nav because the button carries an inline display style
+     (App.tsx) that would otherwise win over a plain display:none here. */
+  .page-nav-title {
+    display: none;
+  }
+
+  .theme-toggle-nav {
+    display: none !important;
+  }
+
+  .page-nav-link {
+    font-size: 0.9rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* min-width:0 lets this flex item shrink below its content's natural width;
+     without it, a long active title (e.g. "Experience") can push later tabs
+     completely past the edge of the viewport with no way to reach them.
+     overflow-x:auto means the worst case is a scrollable strip, never tabs
+     that vanish outright — mirrors pbb.sh's own .page-nav-tabs.
+     flex:1 + space-evenly makes the four tabs fill the row and space
+     themselves out evenly instead of clumping to the left. */
+  .page-nav-tabs {
+    flex: 1;
+    min-width: 0;
+    gap: 0.3rem;
+    justify-content: space-evenly;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .page-nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page-nav-link {
+    flex-shrink: 0;
+  }
+}
+
+/* Mobile Profile Sticky Bar */
+.mobile-profile {
+  display: none;
+  /* stretch (not center) so .mobile-avatar can be sized via align-self:stretch
+     to exactly span from the top of the name to the bottom of the profile
+     links row below it, instead of a fixed small square. */
+  align-items: stretch;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  /* Same solid background as .page-nav-row (see its comment) so the two
+     sticky bars read as one continuous piece instead of the header looking
+     see-through next to a solid nav bar. */
+  background: var(--nav-solid-bg);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .mobile-profile {
+    /* Bleeds out to the true viewport edge on all three outer sides, past
+       .outer-padding's inset — padding above already matches .outer-padding's
+       1rem, so the avatar/name still line up with the content below, which
+       keeps that inset. Top needs the same treatment as left/right: without
+       it, this sits 1rem below the real viewport top until you scroll past
+       that 1rem and it becomes sticky-stuck, leaving a gap that shows the
+       page background instead of the header's own background at rest. */
+    width: calc(100% + 2rem);
+    margin: -1rem -1rem 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mobile-profile {
+    display: flex;
+  }
+}
+
+/* --mobile-avatar-size is set from .mobile-profile-info's real measured
+   height (see MobileProfile.tsx) — exactly as tall as the name row + profile
+   links row below, square, instead of a small fixed 50px box. */
+.mobile-avatar {
+  width: var(--mobile-avatar-size, 64px);
+  height: var(--mobile-avatar-size, 64px);
+  border-radius: 1rem;
+  object-fit: cover;
+  border: none;
+  flex-shrink: 0;
+}
+
+.mobile-avatar-placeholder {
+  width: var(--mobile-avatar-size, 64px);
+  height: var(--mobile-avatar-size, 64px);
+  border-radius: 1rem;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  color: white;
+  font-weight: bold;
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.mobile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-name-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.mobile-name {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--primary);
+}
+
+.mobile-name-last {
+  font-weight: 700;
+}
+
+.mobile-name-alt {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.mobile-theme-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-social .social-links {
+  gap: 0.4rem;
+}
+
+.mobile-social .social-icon-btn {
+  width: 1.8rem;
+  height: 1.8rem;
+  font-size: 0.9rem;
+}
+
+/* Compact Section Styling for About page */
+.compact-card {
+  padding: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  border-radius: 1rem !important;
+}
+
+.compact-card h2 {
+  font-size: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.compact-card h3 {
+  font-size: 1.15rem !important;
+}
+
+.compact-card p,
+.compact-card li {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+}
+
+
+/* Compact home sections rules */
+.compact-sections section {
+  margin-bottom: 1.25rem;
+  /* Unified margin between sections */
+}
+
+.compact-sections h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Unified section card for Education / Experience / Awards / Teaching.
+   Icon + text are both normal-flow children inside the card — nothing
+   escapes the card's box via negative offsets, so the sticky nav bar can
+   never be pierced by a logo (it previously could: see git history). */
+.section-card {
+  position: relative;
+}
+
+.exp-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  /* Tied to the same var the card uses for its own padding (not a separately
+     hardcoded 1rem) so the first row's top inset and the last row's bottom
+     inset always match the card's edge padding exactly — otherwise they only
+     happened to match at the desktop breakpoint where both were 1rem, and
+     drifted apart (1rem vs 0.75rem) once --glass-padding stepped down for
+     mobile. */
+  padding: var(--glass-padding) 0;
+}
+
+.exp-row:first-child {
+  padding-top: 0;
+}
+
+.exp-row:last-child {
+  padding-bottom: 0;
+}
+
+.exp-row-divider {
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* align-items:center on .exp-row keeps this centered against the text block
+   regardless of how tall the row is. */
+.exp-icon-col {
+  flex-shrink: 0;
+  width: var(--exp-icon-size);
+  height: var(--exp-icon-size);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+}
+
+.exp-body {
+  /* Single source of truth for the gap between every text line in a row
+     (title, date, affiliation, note) — also read by the mobile .timeline-row
+     override below so the two gaps can't drift out of sync again the way
+     they did as separate hardcoded values (0.3rem here vs 0.15rem there). */
+  --exp-line-gap: 0.3rem;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--exp-line-gap);
+}
+
+/* Ensure the spacing between title, affiliation, notes are exactly the same (controlled by gap) */
+.exp-body h3,
+.exp-body .timeline-row,
+.exp-body .timeline-note,
+.exp-body .timeline-affiliation,
+.exp-body .timeline-meta-text {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.exp-body h3 {
+  font-size: 1.1rem !important;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  /* Stay inline (icon + text side by side) rather than stacking the icon
+     above the text — --exp-icon-size is shrunk above so it still fits
+     comfortably next to the wrapped title/date/affiliation lines. */
+  .exp-row {
+    gap: 0.65rem;
+  }
+}
+
+/* Customized News Scrollbar. max-height is set inline by the News component,
+   measured from the actual first-3-items height rather than a guessed px value. */
+.news-scroll-list {
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.news-scroll-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.news-scroll-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.news-scroll-list::-webkit-scrollbar-thumb {
+  background-color: var(--glass-border);
+  border-radius: 3px;
+}
+
+/* News list items — symmetric padding, flex row */
+.news-item {
+  display: flex;
+  gap: 1rem;
+  /* Centered rather than top-aligned so the date sits level with the middle
+     of the content next to it once that content wraps to 2+ lines. */
+  align-items: center;
+  /* Tied to the card's own padding var, same reasoning as .exp-row above —
+     keeps the first/last item's edge inset matching the card's padding at
+     every breakpoint instead of just coincidentally at desktop. */
+  padding: var(--glass-padding) 0;
+}
+
+.news-date {
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 100px;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.news-content {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+/* Institution logo rendering + shared timeline text styles (used by .exp-body above) */
+.timeline-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0;
+}
+
+.timeline-logo-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.bg-duke {
+  background-color: #003087;
+}
+
+.bg-ntu {
+  background-color: #970302;
+}
+
+.bg-notredame {
+  background-color: #0c2340;
+}
+
+.bg-sinica {
+  background-color: #1f4e79;
+}
+
+.timeline-note {
+  font-size: 0.95rem;
+}
+
+.timeline-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.timeline-meta-text {
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.timeline-affiliation {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  /* Title+date and affiliation+location were side-by-side (space-between),
+     which looked broken as soon as the left side wrapped to 2+ lines (the
+     short right-side text would end up stranded next to the wrong line).
+     Stack them instead so each piece gets the row's full width. Placed here,
+     after the base .timeline-row/.timeline-meta-text rules, since an earlier
+     copy of this override sitting before those base rules in the file was
+     silently losing the cascade (same-specificity, later-wins bug — see
+     CLAUDE.md's CSS cascade order note) and never actually applied. */
+  .timeline-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--exp-line-gap);
+  }
+
+  .timeline-meta-text {
+    font-weight: 500;
+    white-space: normal;
+  }
+}
+
+/* ─── Whole-page glass wrapper ─── */
+.page-glass {
+  padding: 2rem !important;
+  /* Unified top, bottom, left, right padding */
+  border-radius: 2rem !important;
+}
+
+@media (max-width: 1024px) {
+  .page-glass {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* ─── Unified Hover Animation for Interactive Buttons/Elements ─── */
+.social-icon-btn,
+.btn,
+.page-nav-link,
+.theme-toggle-nav {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.social-icon-btn:hover,
+.btn:hover,
+.page-nav-link:hover,
+.theme-toggle-nav:hover {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+}
+
+[data-theme='dark'] .social-icon-btn:hover,
+[data-theme='dark'] .btn:hover,
+[data-theme='dark'] .page-nav-link:hover,
+[data-theme='dark'] .theme-toggle-nav:hover {
+  background-color: var(--primary) !important;
+  color: #002147 !important;
+  border-color: var(--primary) !important;
+}
+
+/* ─── Publications Link Buttons Styling (matches social-icon-btn) ─── */
+.pub-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--primary) !important;
+  box-shadow: var(--shadow) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Light mode hover: navy background, white text */
+.pub-btn:hover {
+  background-color: #002147 !important;
+  color: #ffffff !important;
+  border-color: #002147 !important;
+}
+
+/* Dark mode hover: gold background, navy text */
+[data-theme='dark'] .pub-btn:hover {
+  background-color: #d4af37 !important;
+  color: #002147 !important;
+  border-color: #d4af37 !important;
+}
+
+/* Publications and Service list items — equal vertical padding and margin alignment */
+/* Same var-tied padding as .exp-row/.news-item above, for the same reason. */
+.pub-entry,
+.service-entry {
+  padding: var(--glass-padding) 0;
+}
+
+/* Remove browser default top margins that cause leaking vertical spacing in publications */
+.pub-entry h3,
+.pub-entry p,
+.pub-entry details {
+  margin-top: 0 !important;
+}
+
+/* One authoritative spacing rule per piece of a publication entry, instead of
+   the same margin repeated as an inline style on every entry. */
+.pub-status {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.pub-entry h3.pub-title {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.pub-authors {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.pub-venue {
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.pub-abstract {
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.pub-abstract summary {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.pub-abstract-text {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+}
+
+.pub-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+/* ─── Spacing Cleanup for Perfect Border Spacing ─── */
+
+/* Reset first/last child vertical padding inside card lists so the top/bottom spacing
+   to the card borders matches the left/right card padding (var(--glass-padding)) exactly.
+   (.exp-row's own first/last reset lives alongside its other rules above.) */
+.news-item:first-child {
+  padding-top: 0;
+}
+
+.news-item:last-child {
+  padding-bottom: 0;
+}
+
+.pub-entry:first-child,
+.service-entry:first-child {
+  padding-top: 0;
+}
+
+.pub-entry:last-child,
+.service-entry:last-child {
+  padding-bottom: 0;
+}
+
+/* Remove trailing section margin inside wrapping containers */
+section:last-child,
+.compact-sections section:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Normalize markdown layout margins inside cards */
+.markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ─── Slightly smaller body/content text on mobile ───
+   Headings already step down at these breakpoints (above); this covers the
+   remaining content copy (Bio/post paragraphs, Experience entries, News,
+   Publications) that still felt too large — deliberately excludes the
+   mobile header (MobileProfile) and the nav bar, which keep their own sizing. */
+@media (max-width: 768px) {
+  /* !important beats Bio's inline style={{fontSize:'1.1rem'}} (Sections.tsx) */
+  .markdown-body {
+    font-size: 1rem !important;
+  }
+
+  .markdown-body p {
+    font-size: 0.95rem;
+  }
+
+  /* Unified size across title/date/affiliation/details on mobile — weight
+     and color still differ per field, but the size no longer does (a real
+     user-reported inconsistency: title read noticeably larger than the
+     other three fields). */
+  .exp-body h3,
+  .timeline-note,
+  .timeline-meta-text,
+  .timeline-affiliation {
+    font-size: 0.95rem !important;
+  }
+
+  .news-date,
+  .news-content {
+    font-size: 0.9rem;
+  }
+
+  .pub-authors,
+  .pub-venue {
+    font-size: 0.95rem;
+  }
+
+  /* Location reads fine alongside institution on the wide desktop layout,
+     but on mobile — where each field already gets its own full-width line
+     (see .timeline-row above) — it adds a line to every single entry across
+     Education/Experience/Awards/Teaching without adding much. Keep it for
+     desktop, hide it here. */
+  .timeline-location {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-body {
+    font-size: 0.95rem !important;
+  }
+
+  .markdown-body p {
+    font-size: 0.9rem;
+  }
+
+  .exp-body h3,
+  .timeline-note,
+  .timeline-meta-text,
+  .timeline-affiliation {
+    font-size: 0.9rem !important;
   }
 }

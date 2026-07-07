@@ -13,6 +13,7 @@
         "venue": "IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems",
         "year": 2026,
         "abstract": "Although deep learning has demonstrated remarkable capability in learning from unstructured data, modern tree-based ensemble models remain superior in extracting relevant information and learning from structured datasets. While several efforts have been made to accelerate tree-based models, the inherent characteristics of the models pose significant challenges for conventional accelerators. Recent research leveraging content-addressable memory (CAM) offers a promising solution for accelerating tree-based models, yet existing designs suffer from excessive memory consumption and low utilization. This work addresses these challenges by introducing RETENTION, an end-to-end framework that significantly reduces CAM capacity requirement for tree-based model inference. We propose an iterative pruning algorithm with a novel pruning criterion tailored for bagging-based models (e.g., Random Forest), which minimizes model complexity while ensuring controlled accuracy degradation. Additionally, we present a tree mapping scheme that incorporates two innovative data placement strategies to alleviate the memory redundancy caused by the widespread use of don’t care states in CAM. Experimental results show that implementing the tree mapping scheme alone reduces CAM capacity requirement by 1.46× to 21.30×, while the full RETENTION framework achieves 4.35× to 207.12× reduction with less than 3% accuracy loss. These results demonstrate that RETENTION is highly effective in minimizing CAM resource demand, providing a resource-efficient direction for tree-based model acceleration.",
+        "selected": true,
         "links": {
             "paper": "https://ieeexplore.ieee.org/abstract/document/11511658",
             "github": "https://github.com/datou0718/RETENTION"
@@ -32,6 +33,7 @@
         "venue": "ACM/IEEE International Conference on Hardware/Software Codesign and System Synthesis",
         "year": 2025,
         "abstract": "Tree-based model remains state-of-the-art for many tasks involving tabular data. While these models are favored in resource-constrained environments, the inherent characteristics result in inefficiency during inference, posing significant challenges for conventional accelerators. Recent research has achieved unprecedented acceleration with content-addressable memory (CAM), yet at the cost of overwhelming memory consumption with low utilization, which is impractical for numerous real-world applications. This work addresses these issues by introducing an end-to-end framework RETENTION. RETENTION incorporates (1) a pruning algorithm to minimize model complexity under a user-specified accuracy loss tolerance, and (2) two data placement strategies to enhance memory utilization and further reduce capacity requirement. Experiment results show that space efficiency can be improved from 4.35× to 207.12× with less than 3% accuracy loss.",
+        "selected": true,
         "links": {
             "paper": "https://dl.acm.org/doi/abs/10.1145/3742873.3758342",
             "github": "https://github.com/datou0718/RETENTION"
@@ -50,6 +52,7 @@
         "venue": "IEEE/IFIP International Conference on Dependable Systems and Networks",
         "year": 2024,
         "abstract": "Advanced persistent threat (APT) cyberattacks are serious threats to corporations and governments. The prolong dwell time associated with APTs significantly increase the difficulty on detecting them in provenance graphs. To reduce the detection complexity, some works have demonstrated the effectiveness of employing pattern matching on provenance graphs in conjunction with APT lifecycle models to pinpoint short-duration attack steps, also known as “tactics, techniques, and procedures” (TTPs). However, when dealing with more complex TTPs, particularly those involving graph-based and partial ordering, few tools can incrementally and efficiently handle them. In this paper, we present IPMES, a tool that has been publicly released to address this gap. By leveraging specific optimizations, it provides efficient incremental matching for those TTPs, and can handle practical system audit event streams. Experiments conducted on synthetic and real-world data demonstrated the practical feasibility of IPMES in TTP detection.",
+        "selected": false,
         "links": {
             "paper": "https://ieeexplore.ieee.org/abstract/document/10646966",
             "github": "https://github.com/littleponywork/IPMES"

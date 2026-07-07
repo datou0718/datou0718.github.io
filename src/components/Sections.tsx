@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { content, type NewsItem, type Publication } from '../data/content';
 import newsData from '../data/news.json';
 import publicationsData from '../data/publications.json';
@@ -9,9 +9,9 @@ import remarkBreaks from 'remark-breaks';
 export const ResearchInterests: React.FC = () => (
     <section className="fade-in">
         <h2>Research Interests</h2>
-        <ul style={{ listStyleType: 'none', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+        <ul style={{ listStyleType: 'none', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {content.researchInterests.map((interest, index) => (
-                <li key={index} className="glass-card" style={{ padding: '0.75rem 1.5rem', fontWeight: 500 }}>
+                <li key={index} className="glass-card" style={{ padding: '0.5rem 1rem', fontWeight: 500 }}>
                     {interest}
                 </li>
             ))}
@@ -21,71 +21,169 @@ export const ResearchInterests: React.FC = () => (
 
 export const Bio: React.FC = () => (
     <section className="fade-in">
-        <h2>About Me</h2>
-        <div className="glass-card">
-            <div className="markdown-body" style={{ fontSize: '1.1rem' }}>
-                <ReactMarkdown remarkPlugins={[remarkBreaks]}>
-                    {content.bio}
-                </ReactMarkdown>
-            </div>
+        <div className="markdown-body" style={{ fontSize: '1.1rem' }}>
+            <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                {content.bio}
+            </ReactMarkdown>
         </div>
     </section>
 );
 
 export const News: React.FC = () => {
-    const [visibleCount, setVisibleCount] = useState(3);
     const typedNewsData = newsData as NewsItem[];
+    const listRef = useRef<HTMLDivElement>(null);
+    // Cap the list to exactly the first 3 items' rendered height (rather than a
+    // guessed px value) so a 4th+ item always scrolls instead of just showing.
+    const [maxHeight, setMaxHeight] = useState<number | 'none'>('none');
+
+    useLayoutEffect(() => {
+        const list = listRef.current;
+        if (!list) return;
+        const items = list.querySelectorAll<HTMLElement>('.news-item');
+        setMaxHeight(items.length > 3 ? items[3].offsetTop : 'none');
+    }, [typedNewsData.length]);
 
     return (
-        <section className="fade-in">
+        <section className="fade-in" style={{ marginBottom: '1.25rem' }}>
             <h2>Recent News</h2>
-            <div className="glass-card">
-                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                    {typedNewsData.slice(0, visibleCount).map((item, index) => (
-                        <div key={index} className="mobile-stack" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderBottom: index < typedNewsData.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < typedNewsData.slice(0, visibleCount).length - 1 ? '1.5rem' : '0' }}>
-                            <span style={{ fontWeight: 700, color: 'var(--primary)', minWidth: '110px', fontSize: '1.05rem' }}>{item.date}</span>
-                            <span style={{ flex: 1, fontSize: '1.1rem' }}>{item.content}</span>
+            <div className="glass-card news-card">
+                <div className="news-scroll-list" ref={listRef} style={{ maxHeight }}>
+                    {typedNewsData.map((item, index) => (
+                        <div
+                            key={index}
+                            className="news-item"
+                            style={{
+                                borderBottom: index < typedNewsData.length - 1 ? '1px solid var(--glass-border)' : 'none',
+                            }}
+                        >
+                            <span className="news-date">{item.date}</span>
+                            <span className="news-content">{item.content}</span>
                         </div>
                     ))}
                 </div>
             </div>
-            {visibleCount < typedNewsData.length && (
-                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-                    <button
-                        onClick={() => setVisibleCount(prev => prev + 5)}
-                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '1rem' }}
-                        title="Show 5 more news items"
-                    >
-                        Show More
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                </div>
-            )}
         </section>
     );
 };
 
+const institutionDetails: Record<string, { url: string; color: string; darkColor: string; fallbackText: string; logo: string }> = {
+    "Duke University": {
+        url: "https://www.duke.edu/",
+        color: "#003087",
+        darkColor: "#66a3ff",
+        fallbackText: "D",
+        logo: "/logos/duke.svg"
+    },
+    "National Taiwan University": {
+        url: "https://www.ntu.edu.tw/",
+        color: "#970302",
+        darkColor: "#ff6b6b",
+        fallbackText: "NTU",
+        logo: "/logos/ntu.png"
+    },
+    "University of Notre Dame": {
+        url: "https://www.nd.edu/",
+        color: "#0c2340",
+        darkColor: "#f1c40f",
+        fallbackText: "ND",
+        logo: "/logos/notredame.svg"
+    },
+    "Academia Sinica": {
+        url: "https://www.sinica.edu.tw/",
+        color: "#1f4e79",
+        darkColor: "#3a86c8",
+        fallbackText: "AS",
+        logo: "/logos/sinica.svg"
+    }
+};
+
+const TimelineLogo: React.FC<{ institution: string }> = ({ institution }) => {
+    const [imgError, setImgError] = React.useState(false);
+    const details = institutionDetails[institution] || {
+        url: "#",
+        color: "var(--primary)",
+        darkColor: "var(--primary)",
+        fallbackText: institution.charAt(0),
+        logo: ""
+    };
+
+    const bgClass = institution.includes("Duke") ? "bg-duke" :
+        institution.includes("Taiwan") ? "bg-ntu" :
+            institution.includes("Notre Dame") ? "bg-notredame" :
+                institution.includes("Academia Sinica") ? "bg-sinica" : "";
+
+    if (imgError || !details.logo) {
+        return (
+            <div className={`timeline-logo-fallback ${bgClass}`} style={!bgClass ? { backgroundColor: 'var(--primary)' } : undefined}>
+                {details.fallbackText}
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={details.logo}
+            alt={`${institution} logo`}
+            className="timeline-logo-img"
+            onError={() => setImgError(true)}
+        />
+    );
+};
+
+const TimelineAffiliation: React.FC<{ institution: string }> = ({ institution }) => {
+    return (
+        <span className="timeline-affiliation">
+            {institution}
+        </span>
+    );
+};
+
+interface TimelineItemProps {
+    title: string;
+    time: string;
+    affiliation: string;
+    location?: string;
+    note?: string;
+}
+
+
+/** A single row within a unified section card — icon and text are both normal-flow
+ *  children inside the glass card (icon centered via flexbox, not absolute positioning). */
+const TimelineRow: React.FC<TimelineItemProps & { isLast: boolean }> = ({ title, time, affiliation, location, note, isLast }) => (
+    <div className={`exp-row${isLast ? '' : ' exp-row-divider'}`}>
+        <div className="exp-icon-col">
+            <TimelineLogo institution={affiliation} />
+        </div>
+
+        <div className="exp-body">
+            <div className="timeline-row">
+                <h3>{title}</h3>
+                <span className="timeline-meta-text">{time}</span>
+            </div>
+            <div className="timeline-row">
+                <TimelineAffiliation institution={affiliation} />
+                {location && <span className="timeline-meta-text timeline-location">{location}</span>}
+            </div>
+            {note && <p className="text-secondary timeline-note">{note}</p>}
+        </div>
+    </div>
+);
+
 export const Education: React.FC = () => (
     <section className="fade-in">
         <h2>Education</h2>
-        <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                {content.education.map((item, index) => (
-                    <div key={index} style={{ borderBottom: index < content.education.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.education.length - 1 ? '1.5rem' : '0' }}>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.degree}</h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
-                        </div>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
-                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
-                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
-                        </div>
-                        {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
-                    </div>
-                ))}
-            </div>
+        <div className="glass-card section-card">
+            {content.education.map((item, index) => (
+                <TimelineRow
+                    key={index}
+                    title={item.degree}
+                    time={item.year}
+                    affiliation={item.institution}
+                    location={item.location}
+                    note={item.details}
+                    isLast={index === content.education.length - 1}
+                />
+            ))}
         </div>
     </section>
 );
@@ -93,22 +191,18 @@ export const Education: React.FC = () => (
 export const Experience: React.FC = () => (
     <section className="fade-in">
         <h2>Experience</h2>
-        <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                {content.experience.map((item, index) => (
-                    <div key={index} style={{ borderBottom: index < content.experience.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.experience.length - 1 ? '1.5rem' : '0' }}>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.role}</h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.time}</span>
-                        </div>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
-                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
-                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
-                        </div>
-                        {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
-                    </div>
-                ))}
-            </div>
+        <div className="glass-card section-card">
+            {content.experience.map((item, index) => (
+                <TimelineRow
+                    key={index}
+                    title={item.role}
+                    time={item.time}
+                    affiliation={item.institution}
+                    location={item.location}
+                    note={item.details}
+                    isLast={index === content.experience.length - 1}
+                />
+            ))}
         </div>
     </section>
 );
@@ -116,79 +210,79 @@ export const Experience: React.FC = () => (
 export const SelectedAwards: React.FC = () => (
     <section className="fade-in">
         <h2>Selected Awards</h2>
-        <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                {content.awards.map((item, index) => (
-                    <div key={index} style={{ borderBottom: index < content.awards.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.awards.length - 1 ? '1.5rem' : '0' }}>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>{item.name}</h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
-                        </div>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.description ? '0.5rem' : '0', gap: '0.5rem' }}>
-                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.organization}</p>
-                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
-                        </div>
-                        {item.description && <p className="text-secondary" style={{ margin: 0 }}>{item.description}</p>}
-                    </div>
-                ))}
-            </div>
+        <div className="glass-card section-card">
+            {content.awards.map((item, index) => (
+                <TimelineRow
+                    key={index}
+                    title={item.name}
+                    time={item.year}
+                    affiliation={item.organization}
+                    location={item.location}
+                    note={item.description}
+                    isLast={index === content.awards.length - 1}
+                />
+            ))}
         </div>
     </section>
 );
 
-export const Publications: React.FC = () => {
-    const [visibleCount, setVisibleCount] = useState(3);
+export const Publications: React.FC<{ title?: string; selectedOnly?: boolean }> = ({ title = "Publications", selectedOnly = false }) => {
+    const [visibleCount, setVisibleCount] = useState(5);
     const typedPublicationsData = publicationsData as Publication[];
+
+    const filteredPubs = selectedOnly
+        ? typedPublicationsData.filter(pub => pub.selected)
+        : typedPublicationsData;
 
     return (
         <section className="fade-in">
-            <h2>Representative Publications</h2>
+            {title && <h2>{title}</h2>}
             <div className="glass-card">
-                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                    {typedPublicationsData.slice(0, visibleCount).map((pub, index) => (
-                        <div key={index} style={{ borderBottom: index < typedPublicationsData.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < typedPublicationsData.slice(0, visibleCount).length - 1 ? '1.5rem' : '0' }}>
+                <div>
+                    {filteredPubs.slice(0, visibleCount).map((pub, index) => (
+                        <div key={index} className="pub-entry" style={{ borderBottom: index < filteredPubs.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none' }}>
                             {pub.status && (
-                                <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem', marginBottom: '0.25rem', letterSpacing: '0.02em' }}>
+                                <div className="pub-status">
                                     {pub.status}
                                 </div>
                             )}
-                            <h3 style={{ marginBottom: '0.5rem' }}>{pub.title}</h3>
-                            <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>
+                            <h3 className="pub-title">{pub.title}</h3>
+                            <p className="pub-authors">
                                 {pub.authors.map((a, i) => (
                                     <span key={i} style={{ fontWeight: a === "Yi-Chun Liao" ? 700 : 400 }}>
                                         {a}{i < pub.authors.length - 1 ? ', ' : ''}
                                     </span>
                                 ))}
                             </p>
-                            <p className="text-secondary" style={{ fontStyle: 'italic', marginBottom: '1rem' }}>
+                            <p className="text-secondary pub-venue">
                                 {pub.venue}, {pub.year}
                             </p>
 
-                            <details style={{ marginBottom: '1rem', cursor: 'pointer' }}>
-                                <summary style={{ fontWeight: 600, color: 'var(--primary)' }}>Abstract</summary>
-                                <p style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.05)', borderRadius: '0.5rem' }}>{pub.abstract}</p>
+                            <details className="pub-abstract">
+                                <summary>Abstract</summary>
+                                <p className="pub-abstract-text">{pub.abstract}</p>
                             </details>
 
-                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-                                {pub.links.paper && <a href={pub.links.paper} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Paper</a>}
-                                {pub.links.github && <a href={pub.links.github} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Github</a>}
-                                {pub.links.arxiv && <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Arxiv</a>}
-                                {pub.links.ieee && <a href={pub.links.ieee} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>IEEE</a>}
-                                {pub.links.acm && <a href={pub.links.acm} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>ACM</a>}
-                                {pub.links.code && <a href={pub.links.code} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>Code</a>}
-                                {pub.links.pdf && <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" className="glass-card btn" style={{ padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>PDF</a>}
+                            <div className="pub-links">
+                                {pub.links.paper && <a href={pub.links.paper} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Paper</a>}
+                                {pub.links.github && <a href={pub.links.github} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">GitHub</a>}
+                                {pub.links.arxiv && <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Arxiv</a>}
+                                {pub.links.ieee && <a href={pub.links.ieee} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">IEEE</a>}
+                                {pub.links.acm && <a href={pub.links.acm} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">ACM</a>}
+                                {pub.links.code && <a href={pub.links.code} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Code</a>}
+                                {pub.links.pdf && <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">PDF</a>}
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
-            {visibleCount < typedPublicationsData.length && (
+            {visibleCount < filteredPubs.length && (
                 <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
                     <button
                         onClick={() => setVisibleCount(prev => prev + 5)}
                         className="btn text-primary"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', padding: '0.5rem 1rem' }}
-                        title="Show 5 more publications"
+                        title="Show more publications"
                     >
                         Show More
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -204,24 +298,18 @@ export const Publications: React.FC = () => {
 export const Teaching: React.FC = () => (
     <section className="fade-in">
         <h2>Teaching</h2>
-        <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                {content.teaching.map((item, index) => (
-                    <div key={index} style={{ borderBottom: index < content.teaching.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.teaching.length - 1 ? '1.5rem' : '0' }}>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>
-                                {item.course}
-                            </h3>
-                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.year}</span>
-                        </div>
-                        <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: item.details ? '0.5rem' : '0', gap: '0.5rem' }}>
-                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{item.institution}</p>
-                            {item.location && <span style={{ fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{item.location}</span>}
-                        </div>
-                        {item.details && <p className="text-secondary" style={{ margin: 0 }}>{item.details}</p>}
-                    </div>
-                ))}
-            </div>
+        <div className="glass-card section-card">
+            {content.teaching.map((item, index) => (
+                <TimelineRow
+                    key={index}
+                    title={item.course}
+                    time={item.year}
+                    affiliation={item.institution}
+                    location={item.location}
+                    note={item.details}
+                    isLast={index === content.teaching.length - 1}
+                />
+            ))}
         </div>
     </section>
 );
@@ -230,9 +318,9 @@ export const Service: React.FC = () => (
     <section className="fade-in">
         <h2>Professional Service</h2>
         <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
+            <div>
                 {content.service.map((item, index) => (
-                    <div key={index} className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: index < content.service.length - 1 ? '1px solid var(--glass-border)' : 'none', paddingBottom: index < content.service.length - 1 ? '1.5rem' : '0', gap: '1rem' }}>
+                    <div key={index} className="mobile-stack service-entry" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: index < content.service.length - 1 ? '1px solid var(--glass-border)' : 'none', gap: '1rem' }}>
                         <div>
                             <p style={{ fontWeight: 700, margin: 0 }}>{item.role}</p>
                             <p className="text-secondary" style={{ margin: 0 }}>{item.organization}</p>

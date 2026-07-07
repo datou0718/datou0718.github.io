@@ -9,7 +9,7 @@ export default defineConfig({
     {
       name: 'html-transform',
       transformIndexHtml(html) {
-        const rawName = content.name.split(' (')[0];
+        const rawName = content.name.english;
         return html
           .replace('__TITLE__', `${rawName}'s Homepage`)
           .replace('__DESCRIPTION__', content.title.replace(/"/g, '&quot;'));
@@ -17,7 +17,7 @@ export default defineConfig({
     }
   ],
   server: {
-    port: 8080,
+    port: Number(process.env.PORT) || 8080,
     strictPort: true,
   },
   base: '/',
