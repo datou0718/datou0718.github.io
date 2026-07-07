@@ -31,18 +31,8 @@ const PostsList: React.FC = () => {
     }, []);
 
     return (
-        <div className="fade-in" style={{ padding: '4rem 0 2rem' }}>
+        <div className="fade-in">
             <section>
-                <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
-                    <h1 className="mobile-hide" style={{ margin: 0, color: 'var(--primary)', fontSize: '2.5rem' }}>Posts</h1>
-                    <Link to="/" className="glass-card btn" style={{ padding: '0.5rem 1.25rem', fontWeight: 600, borderRadius: '0.75rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                        Back to Home
-                    </Link>
-                </div>
-
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Loading posts...</div>
                 ) : posts.length === 0 ? (
@@ -50,12 +40,12 @@ const PostsList: React.FC = () => {
                         <p className="text-secondary" style={{ fontSize: '1.2rem', margin: 0 }}>No posts found.</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gap: '1.25rem' }}>
                         {posts.map((post) => (
                             <Link to={`/posts/${post.id}`} key={post.id} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                                <div className="glass-card btn" style={{ padding: '1.5rem', width: '100%', display: 'block', textAlign: 'left' }}>
+                                <div className="glass-card btn" style={{ width: '100%', display: 'block', textAlign: 'left' }}>
                                     <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)', fontSize: '1.25rem' }}>{post.title}</h3>
-                                    <p className="text-secondary" style={{ margin: 0, fontSize: '1.1rem' }}>{post.description}</p>
+                                    <p className="text-secondary" style={{ margin: 0, fontSize: '1.05rem', fontWeight: 400 }}>{post.description}</p>
                                 </div>
                             </Link>
                         ))}

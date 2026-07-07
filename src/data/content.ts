@@ -1,72 +1,16 @@
-export interface NewsItem {
-  date: string;
-  content: string;
-}
-
-export interface EducationItem {
-  degree: string;
-  institution: string;
-  year: string;
-  location: string;
-  details?: string;
-}
-
-export interface ExperienceItem {
-  role: string;
-  institution: string;
-  time: string;
-  location: string;
-  details?: string;
-}
-
-export interface AwardItem {
-  name: string;
-  organization: string;
-  year: string;
-  location: string;
-  description?: string;
-}
-
-export interface Publication {
-  title: string;
-  status?: string;
-  authors: string[];
-  venue: string;
-  year: number;
-  abstract: string;
-  links: {
-    paper?: string;
-    github?: string;
-    pdf?: string;
-    arxiv?: string;
-    ieee?: string;
-    acm?: string;
-    code?: string;
-    project?: string;
-  };
-}
-
-export interface TeachingItem {
-  course: string;
-  institution: string;
-  year: string;
-  location: string;
-  details?: string;
-}
-
-export interface ServiceItem {
-  role: string;
-  organization: string;
-  years: string;
-}
+import type { EducationItem, ExperienceItem, AwardItem, TeachingItem, ServiceItem } from '../types/content';
+export type * from '../types/content';
 
 export const content = {
-  name: "Yi-Chun Liao (廖奕鈞)",
+  name: {
+    english: "Yi-Chun Liao",
+    chinese: "廖奕鈞"
+  },
   title: "Incoming Ph.D. Student",
   email: "yi-chun.liao@duke.edu",
   headshot: "/assets/me.jpg", // e.g., "/assets/headshot.jpg"
   cv: "/assets/CV.pdf", // e.g., "/assets/CV.pdf"
-  socials: {
+  profiles: {
     github: "https://github.com/datou0718",
     scholar: "https://scholar.google.com/citations?user=n7W1nP8AAAAJ&hl=en",
     linkedin: "https://www.linkedin.com/in/yi-chun-liao-07b414269/",
@@ -82,7 +26,7 @@ export const content = {
     {
       degree: "Ph.D. in Electrical and Computer Engineering",
       institution: "Duke University",
-      year: "2026 - ",
+      year: "2026 - Present",
       location: "Durham, NC"
     }
     , {
@@ -96,7 +40,7 @@ export const content = {
     {
       role: "Research Intern",
       institution: "University of Notre Dame",
-      time: "2025 - ",
+      time: "2025 - Present",
       location: "Notre Dame, IN",
       details: "Advisor: Prof. X. Sharon Hu"
     },
@@ -140,8 +84,7 @@ export const content = {
       course: "CSIE3340 Computer Architecture",
       institution: "National Taiwan University",
       year: "2024",
-      location: "Taipei, Taiwan",
-      details: "Undergraduate Teaching Assistant"
+      location: "Taipei, Taiwan"
     }
   ] as TeachingItem[],
   service: [

@@ -1,41 +1,109 @@
-import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
+import React, { useState, useEffect, useRef } from 'react';
+import { HashRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { LayoutProvider } from './context/LayoutContext';
+import Sidebar from './components/Sidebar';
+import MobileProfile from './components/MobileProfile';
+import { ThemeToggleIcon } from './components/ThemeToggleIcon';
 import {
   Bio,
   News,
   ResearchInterests,
   Publications,
-  Teaching,
-  // Service,
-  VisitorMap,
-  Education,
-  Experience,
-  SelectedAwards
+  VisitorMap
 } from './components/Sections';
 
+import ExperiencePage from './pages/ExperiencePage';
+import PublicationsPage from './pages/PublicationsPage';
 import PostsList from './pages/PostsList';
 import PostView from './pages/PostView';
 
 const Home: React.FC = () => (
-  <>
-    <Header />
-    <main>
-      <Bio />
-      <ResearchInterests />
-      <News />
-      <Education />
-      <Experience />
-      <SelectedAwards />
-      <Publications />
-      <Teaching />
-      {/* <Service /> */}
-      <VisitorMap />
-    </main>
-  </>
+  <main className="compact-sections">
+    <Bio />
+    <News />
+    <ResearchInterests />
+    <Publications title="Selected Publications" selectedOnly={true} />
+    <VisitorMap />
+  </main>
 );
 
-const App: React.FC = () => {
+interface NavRowProps {
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+}
+
+const NavRow: React.FC<NavRowProps> = ({ theme, toggleTheme }) => {
+  const location = useLocation();
+  const path = location.pathname;
+
+  const isAboutActive = path === '/';
+  const isExperienceActive = path === '/experience';
+  const isPublicationsActive = path === '/publications';
+  const isPostsActive = path === '/posts' || path.startsWith('/posts/');
+
+  let title = 'About';
+  if (isExperienceActive) title = 'Experience';
+  else if (isPublicationsActive) title = 'Publications';
+  else if (isPostsActive) title = 'Posts';
+
+  // Padding-top only applies once the bar is actually pinned (sentinel
+  // scrolled out of view), so resting layout keeps its tight top spacing
+  // while the stuck bar gets breathing room matching its bottom padding.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [isStuck, setIsStuck] = useState(false);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+    <div ref={sentinelRef} />
+    <div className={`page-nav-row${isStuck ? ' is-stuck' : ''}`}>
+      <h1 className="page-nav-title">{title}</h1>
+      <nav className="page-nav-tabs" style={{ display: 'flex', alignItems: 'center' }}>
+        <Link to="/" className={`page-nav-link ${isAboutActive ? 'active' : ''}`}>
+          About
+        </Link>
+        <Link to="/experience" className={`page-nav-link ${isExperienceActive ? 'active' : ''}`}>
+          Experience
+        </Link>
+        <Link to="/publications" className={`page-nav-link ${isPublicationsActive ? 'active' : ''}`}>
+          Publications
+        </Link>
+        <Link to="/posts" className={`page-nav-link ${isPostsActive ? 'active' : ''}`}>
+          Posts
+        </Link>
+        <button
+          onClick={toggleTheme}
+          className="page-nav-link theme-toggle-nav"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.4rem 0.8rem'
+          }}
+          aria-label="Toggle Theme"
+        >
+          <ThemeToggleIcon theme={theme} />
+        </button>
+      </nav>
+    </div>
+    </>
+  );
+};
+
+const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -47,51 +115,50 @@ const App: React.FC = () => {
   };
 
   return (
-    <Router>
-      <div className="container" style={{ paddingBottom: '5rem' }}>
-        <button
-          onClick={toggleTheme}
-          className="glass-card btn theme-toggle"
-          style={{
-            position: 'fixed',
-            top: '1.5rem',
-            right: '1.5rem',
-            padding: '0.75rem',
-            zIndex: 100,
-            cursor: 'pointer',
-            borderRadius: '50%',
-            width: '3.2rem',
-            height: '3.2rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--primary)',
-            boxShadow: 'var(--shadow-lg)'
-          }}
-          aria-label="Toggle Theme"
-        >
-          {theme === 'light' ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
-            </svg>
-          )}
-        </button>
+    <div className="outer-padding">
+      {/* Mobile Sticky Header */}
+      <MobileProfile theme={theme} toggleTheme={toggleTheme} />
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/posts" element={<PostsList />} />
-          <Route path="/posts/:id" element={<PostView />} />
-        </Routes>
+      <div className="container">
+        <div className="glass-card page-glass">
+          {/* Nav bar spans full glass card width, sticky above both columns */}
+          <NavRow theme={theme} toggleTheme={toggleTheme} />
 
-        <footer style={{ textAlign: 'center', marginTop: '4rem' }} className="text-secondary">
+          <div className="layout-grid">
+            {/* Left Column (Sidebar) */}
+            <div className="sidebar-col">
+              <div className="sidebar-affix">
+                <Sidebar />
+              </div>
+            </div>
+
+            {/* Right Column (Content) */}
+            <div className="content-col">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/experience" element={<ExperiencePage />} />
+                <Route path="/publications" element={<PublicationsPage />} />
+                <Route path="/posts" element={<PostsList />} />
+                <Route path="/posts/:id" element={<PostView />} />
+              </Routes>
+            </div>
+          </div>
+        </div>
+        <footer style={{ textAlign: 'center', marginTop: '2rem' }} className="text-secondary">
           <p>© Copyright {new Date().getFullYear()} Yi-Chun Liao. All rights reserved.</p>
         </footer>
       </div>
-    </Router>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <LayoutProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </LayoutProvider>
   );
 };
 
