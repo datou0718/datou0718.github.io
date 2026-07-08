@@ -48,7 +48,7 @@ as a static site on GitHub Pages with no server-side routing). No test suite.
   `MobileProfile` (mobile-only sticky header) + `.container` →
   `.glass-card.page-glass` → `NavRow` (sticky tab bar, defined inline in
   `App.tsx`) + `.layout-grid` → `.sidebar-col` (desktop `Sidebar`, hidden
-  `<1024px`) + `.content-col` (routed pages).
+  `<1200px`) + `.content-col` (routed pages).
 - Routes (`HashRouter`): `/` → About (`Bio`, `News`, `ResearchInterests`,
   `Publications selectedOnly`, `VisitorMap`, all from `Sections.tsx`),
   `/experience` → `ExperiencePage.tsx` (`Education`, `Experience`,
@@ -70,11 +70,23 @@ as a static site on GitHub Pages with no server-side routing). No test suite.
 
 ## Breakpoints
 
-Three, consistently: `max-width: 1024px` (sidebar hides, mobile header
-appears), `max-width: 768px` (main mobile typography/spacing step-down),
-`max-width: 480px` (narrow-phone further step-down). When adding a new
-responsive rule, put it in the existing breakpoint block for that width rather
-than inventing a new one.
+Three, consistently: `max-width: 1199.98px` paired with `min-width: 1200px`
+(sidebar hides / mobile header appears — the desktop threshold, deliberately
+wider than a plain 1024px so the sidebar layout has more breathing room
+before switching on), `max-width: 768px` (main mobile typography/spacing
+step-down), `max-width: 480px` (narrow-phone further step-down). When adding
+a new responsive rule, put it in the existing breakpoint block for that width
+rather than inventing a new one.
+
+**Use `1199.98px`, not `1200px`, for the mobile-side query.** Pairing
+`max-width: 1200px` with `min-width: 1200px` makes both match simultaneously
+at exactly 1200px — a real, reproduced bug where the mobile header and
+desktop sidebar rendered at once at that one width. `.98px` closes the gap
+for fractional viewport widths too (zoom/DPI scaling can report e.g.
+`1199.4px`, which would match neither a plain `max-width:1199px` nor
+`min-width:1200px`). If you ever change the threshold again, keep this
+paired-epsilon pattern rather than reintroducing two bare equal/adjacent
+integers.
 
 ## The one rule that caused the most bugs: CSS cascade order
 
@@ -111,14 +123,31 @@ overriding `App.tsx`'s inline `style={{ display: 'inline-flex' }}`).
   `var(--glass-padding)`, not a hardcoded rem value.**
 - **`.page-glass`** is the *only* glass element allowed `backdrop-filter`
   (desktop only — resets to fully transparent/no-padding/no-border at
-  `≤1024px` for an edge-to-edge mobile look). Nested `backdrop-filter` breaks
-  `position: sticky` z-ordering, so the sticky nav bar and mobile header
-  instead use **`--nav-solid-bg`**: a `color-mix()` that manually recomputes
-  what `--glass-bg` would look like *if* composited over `--bg-color` (i.e.
-  fakes the glass look with an opaque color, since real translucency isn't an
-  option there). If you ever change `--glass-bg`'s alpha or `--bg-color`, you
-  must recompute `--nav-solid-bg`'s mix percentages to match, or the nav/header
-  will visibly stop matching the cards again.
+  `≤1199.98px` for an edge-to-edge mobile look). Nested `backdrop-filter`
+  breaks `position: sticky` z-ordering, so the sticky nav bar and mobile
+  header instead use **`--nav-solid-bg`**: a precomputed plain hex value
+  (not a live `color-mix()`) approximating what `--glass-bg` looks like
+  composited over `--bg-color` (i.e. fakes the glass look with an opaque
+  color, since real translucency isn't an option there). **Deliberately not
+  a live `color-mix()`** — that was tried first and caused a real, visible
+  color-flash while scrolling (a paint-time artifact from `color-mix()`
+  recomputing as the sticky element's compositing layer engages/disengages;
+  didn't show up in `getComputedStyle` checks, only in actual scrolling). If
+  you ever change `--glass-bg`'s alpha or `--bg-color`, recompute
+  `--nav-solid-bg` by hand and keep it a static value, or both bugs come back.
+- **`.page-nav-row`'s opaque background is deliberately wider than its
+  visible border-bottom.** The background/padding-box spans the *entire*
+  padded width of `.page-glass` (sidebar included, via `padding-left:
+  calc(320px + 2rem)` and a `-2rem` right bleed) — content-col's inner
+  `.glass-card` sections carry `box-shadow`, and with zero horizontal buffer
+  past their edges, that shadow's blur radius visibly leaked through the nav
+  bar while scrolling underneath it. But the user explicitly wants the *visible*
+  bar — its border-bottom, the thing that reads as "this is a bar" — scoped to
+  content-col only, not spanning over the sidebar. Solved by moving the
+  border-bottom to a `::after` pseudo-element with its own `left`/`right`
+  offsets matching content-col's edges, decoupled from the (wider) background.
+  If you resize the sidebar or its gap, update both the row's `padding-left`
+  and the `::after`'s `left`/`right` together, or they'll drift apart again.
 - **`--bg-color` (dark theme) is deliberately not the "obvious" dark navy.**
   It's set to `#001938` — the *already-composited* result of `--glass-bg` over
   a navy background — not the more saturated `#002147` you might reach for.
@@ -150,7 +179,7 @@ overriding `App.tsx`'s inline `style={{ display: 'inline-flex' }}`).
   the mobile header, this wiring means the nav row repositions itself
   automatically — don't add a new hardcoded offset.
 - **`.mobile-profile` and `.page-nav-row` bleed to the true viewport edge**
-  via `margin: -1rem -1rem 0` + `width: calc(100% + 2rem)` at `≤1024px`,
+  via `margin: -1rem -1rem 0` + `width: calc(100% + 2rem)` at `≤1199.98px`,
   canceling `.outer-padding`'s `1rem` inset on all three outer sides (not just
   left/right — an earlier version only canceled left/right and left a visible
   gap/seam above the header at rest scroll position, another user-caught bug).

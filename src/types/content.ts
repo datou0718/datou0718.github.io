@@ -60,3 +60,11 @@ export interface ServiceItem {
   organization: string;
   years: string;
 }
+
+export interface PostMeta {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  file: string;
+}

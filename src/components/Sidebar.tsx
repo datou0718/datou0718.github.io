@@ -62,7 +62,7 @@ const Sidebar: React.FC = () => {
           <h2>{content.name.english}</h2>
           <h3>{content.name.chinese}</h3>
           <p className="sidebar-title">{content.title}</p>
-          <p className="sidebar-affiliation">Duke University</p>
+          <p className="sidebar-affiliation">{content.education[0].institution}</p>
 
           {/* Profile links row (includes email as icon) */}
           <div className="social-row">
