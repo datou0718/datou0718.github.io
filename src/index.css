@@ -15,9 +15,15 @@
   /* Opaque approximation of --glass-bg composited over --bg-color (i.e. what
      a glass card actually looks like once painted) — for the sticky nav,
      which can't use backdrop-filter/true translucency (see .page-glass
-     comment) but still needs to visually match the cards around it. Keep the
-     color/percentage here in sync with --glass-bg's own rgb()/alpha. */
-  --nav-solid-bg: color-mix(in srgb, #ffffff 75%, var(--bg-color) 25%);
+     comment) but still needs to visually match the cards around it.
+     Precomputed to a plain hex value (= color-mix(in srgb, #ffffff 75%,
+     #fcfcfc 25%)) rather than left as a live color-mix() — color-mix()
+     recomputing on a position:sticky element's own compositing layer as it
+     engages/disengages while scrolling caused a real, visible color-flash
+     in-browser (didn't show up in computed-style checks, only in actual
+     scrolling — a paint-time artifact, not a logic bug). If --glass-bg or
+     --bg-color ever change, recompute and update this value by hand. */
+  --nav-solid-bg: #fefefe;
   --shadow: 0 4px 6px -1px rgb(0 33 71 / 0.1), 0 2px 4px -2px rgb(0 33 71 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 33 71 / 0.1), 0 4px 6px -4px rgb(0 33 71 / 0.1);
 
@@ -27,7 +33,11 @@
 
   /* Spacing */
   --section-padding: 5rem 1rem;
-  --container-width: 1360px;
+  /* min(), not a flat px value — scales fluidly with the viewport (92vw) on
+     small-to-medium desktop widths instead of jumping straight to a fixed
+     size the moment the sidebar breakpoint hits, but stops growing past
+     1200px so it doesn't read as too wide on very large monitors. */
+  --container-width: min(1200px, 92vw);
   /* Every glass card on the page shares this one padding value — the only
      exception is .page-glass (the outer page wrapper), which keeps its own
      larger, independent 2rem. */
@@ -62,7 +72,10 @@
   --text-secondary: #b0c4de;
   --glass-bg: rgba(0, 20, 46, 0.6);
   --glass-border: rgba(212, 175, 55, 0.2);
-  --nav-solid-bg: color-mix(in srgb, rgb(0, 20, 46) 60%, var(--bg-color) 40%);
+  /* Precomputed (= color-mix(in srgb, rgb(0, 20, 46) 60%, #001938 40%)) —
+     see the light-theme --nav-solid-bg comment for why this is a plain hex
+     value instead of a live color-mix(). */
+  --nav-solid-bg: #001632;
 }
 
 * {
@@ -237,23 +250,18 @@ a:hover {
   color: var(--text-secondary);
 }
 
-.header-links {
-  justify-content: flex-start;
-  gap: 1rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.mb-8 {
-  margin-bottom: 2rem;
-}
-
 /* Responsive Adjustments */
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
+  /* 100%, not a narrower 90% — this whole range is "mobile mode" (avatar
+     header on top, edge-to-edge nav bar via negative margins relative to
+     .outer-padding). A leftover 90% here from an earlier, pre-edge-to-edge
+     design narrowed and centered .container just for the 768–1200px slice,
+     which every full-bleed child inside it (.page-nav-row, its border-bottom
+     separator) inherited as an extra ~58px inset it never asked for — while
+     .mobile-profile (a sibling of .container, not a descendant) correctly
+     bled to the true edge, producing a visible mismatch between the two. */
   :root {
-    --container-width: 90%;
+    --container-width: 100%;
   }
 
   h1 {
@@ -331,11 +339,6 @@ a:hover {
 
 
 
-  /* Center Research Interests tags */
-  section h2+ul {
-    justify-content: center !important;
-  }
-
   /* Smaller font/padding (overriding the inline style) so more tags fit per
      row in the narrower mobile column instead of stacking one-per-line. */
   section h2+ul li {
@@ -358,15 +361,6 @@ a:hover {
     text-align: left !important;
   }
 
-  .mobile-hide {
-    display: none !important;
-  }
-
-  .header-contact,
-  .header-links {
-    justify-content: center !important;
-  }
-
   /* Center headshot container when stacked */
   .mobile-stack>div:first-child>div {
     margin: 0 auto;
@@ -375,12 +369,9 @@ a:hover {
 
 @media (max-width: 480px) {
 
-  h1,
-  h2,
-  h3 {
-    text-align: left !important;
-  }
-
+  /* text-align:left!important for h1-h3 isn't repeated here — the 768px
+     block above already sets it, and this range is a strict subset, so it
+     already applies. Only the smaller font sizes actually differ here. */
   h1 {
     font-size: 1.45rem;
   }
@@ -392,12 +383,6 @@ a:hover {
 
   h3 {
     font-size: 1.05rem;
-  }
-
-  /* Specific header centering overrides for narrow mobile */
-  .mobile-stack h1,
-  .mobile-stack p.text-secondary {
-    text-align: center !important;
   }
 
   .glass-card {
@@ -412,7 +397,7 @@ a:hover {
 
 /* Markdown Body Styles */
 .markdown-body {
-  font-family: var(--font-primary);
+  font-family: var(--font-main);
 }
 
 .markdown-body h1,
@@ -484,15 +469,6 @@ a:hover {
 
 .markdown-body>*:last-child {
   margin-bottom: 0 !important;
-}
-
-@media (max-width: 480px) {
-  .theme-toggle {
-    top: 1rem !important;
-    right: 1rem !important;
-    width: 2.8rem !important;
-    height: 2.8rem !important;
-  }
 }
 
 .markdown-body strong {
@@ -645,7 +621,7 @@ a:hover {
   min-height: 100vh;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   .outer-padding {
     padding: 1rem;
   }
@@ -669,7 +645,7 @@ a:hover {
   min-width: 0;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .sidebar-col {
     display: block;
   }
@@ -677,9 +653,17 @@ a:hover {
 
 .sidebar-affix {
   position: sticky;
-  /* Matches .page-nav-row.is-stuck's padding-top so the avatar's top edge
+  /* Matches .page-nav-row's constant top padding so the avatar's top edge
      lines up with the top of the nav bar's text once both are stuck while scrolling. */
   top: 1rem;
+  /* .page-nav-row's background now bleeds under the sidebar's width too (see
+     its own comment — needed so scrolling content's box-shadow can't leak
+     through there), which puts it in the same x,y region as this sticky
+     avatar once both are stuck. Without a z-index above .page-nav-row's 100,
+     that bled background — not this element — was what actually painted on
+     top there (confirmed via elementFromPoint), visually clipping the top of
+     the avatar during scroll instead of the two sitting cleanly side by side. */
+  z-index: 101;
 }
 
 .sidebar-wrap {
@@ -809,43 +793,6 @@ a:hover {
   border-color: var(--primary);
 }
 
-.contact-block {
-  text-align: left;
-  border-top: 1px solid var(--glass-border);
-  padding-top: 1.25rem;
-  max-width: 240px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.contact-item i {
-  color: var(--primary);
-  font-size: 1rem;
-  width: 1.25rem;
-  text-align: center;
-}
-
-.contact-item a {
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.contact-item a:hover {
-  color: var(--primary);
-}
-
 /* Table of Contents in Sidebar */
 .toc-area {
   margin-top: 1.5rem;
@@ -921,25 +868,58 @@ a:hover {
      like once composited over the page — matches the surrounding cards
      instead of the flatter, differently-toned --bg-color underneath them. */
   background: var(--nav-solid-bg);
-  /* Align with content-col only — don't bleed into the sidebar column */
-  margin-left: calc(320px + 2rem);
-  /* No top padding at rest: page-glass already provides 2rem above this row,
-     matching its left/right/bottom padding. Padding-top is added only once
-     stuck (see .is-stuck below), so the resting layout stays tight while the
-     pinned bar gets equal space above and below its text. */
-  padding: 0 0 1rem 0;
+  /* padding-left (not margin-left) so this row's own box — and its opaque
+     background — spans the card's FULL padded content width, including the
+     strip above the sidebar, not just above content-col. Content-col cards
+     and .page-glass itself both carry box-shadow (see .glass-card), and
+     their shadow blur radius pokes a few px past the card/box edge; a
+     margin-left-based row that only covered content-col's width left that
+     sliver above the sidebar unpainted, so as inner cards scrolled underneath
+     the fixed bar, their shadow leaked through right at the seam — visible
+     as a thin dark line at both ends of the bar right as it happened. Full
+     padded-width coverage removes any gap for that to leak into — this is
+     purely a paint/coverage concern though, not a visual one: nav-solid-bg
+     already reads as an invisible extension of the card's own background,
+     so painting it under the sidebar too doesn't look like a "bar" there.
+     The border-bottom below is what actually reads as "this is a bar", so
+     it's deliberately scoped narrower via ::after (see below) — visually
+     the bar looks scoped to content-col, while staying shadow-safe underneath. */
+  /* By default this box's right edge stops exactly at content-col's own
+     right edge (page-glass's content box has nothing past content-col on
+     that side to borrow extra width from, unlike the sidebar on the left).
+     content-col's inner .glass-card sections carry box-shadow with a few px
+     of blur past their own edge — with zero buffer there, that blur poked
+     past this row's right edge and leaked through while scrolling, the same
+     bug as the left side but without a sidebar's width to accidentally fix
+     it for free. -2rem margin-right bleeds this box past page-glass's own
+     right padding for coverage; padding-right adds the same 2rem back on
+     the inside so the flex content (the tabs, which justify-content:
+     space-between pins to this box's end edge) stays visually aligned with
+     content-col's edge instead of drifting into the newly-added bleed —
+     mirrored by the ::after's `right: 2rem` below so the border-bottom
+     line lines up with the tabs and title too. */
+  padding: 1rem 2rem 1rem calc(320px + 2rem);
+  margin-right: -2rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--glass-border);
-  transition: padding-top 0.15s ease;
 }
 
-@media (min-width: 1024px) {
-  .page-nav-row.is-stuck {
-    padding-top: 1rem;
+@media (min-width: 1200px) {
+  /* Separator line only under content-col (not the full opaque row above —
+     see its own comment) so the nav bar visually reads as scoped to the
+     content column, matching the sidebar having no matching line of its own. */
+  .page-nav-row::after {
+    content: '';
+    position: absolute;
+    left: calc(320px + 2rem);
+    /* Matches the row's own -2rem margin-right bleed, so the visible line
+       still stops at content-col's edge even though the row itself is wider. */
+    right: 2rem;
+    bottom: 0;
+    border-bottom: 1px solid var(--glass-border);
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   .page-nav-row {
     /* Set from MobileProfile's actual measured height (see its
        useLayoutEffect) so this sits flush underneath it — a hardcoded guess
@@ -952,6 +932,9 @@ a:hover {
     width: calc(100% + 2rem);
     margin-left: -1rem;
     padding: 0.75rem 1rem;
+    /* No sidebar/content-col split on mobile — the line just spans this
+       row's own (already full-bleed) width directly, no ::after needed. */
+    border-bottom: 1px solid var(--glass-border);
   }
 }
 
@@ -987,6 +970,9 @@ a:hover {
 }
 
 .theme-toggle-nav {
+  background: none;
+  border: none;
+  cursor: pointer;
   font-size: 1.05rem;
   padding: 0.4rem 0.8rem;
   border-radius: 0.75rem;
@@ -1018,12 +1004,13 @@ a:hover {
   color: #002147;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   /* The mobile header (MobileProfile) already has its own theme toggle next
      to the name, so the nav row's copy would be redundant; the page title is
-     dropped here too, leaving just the four page tabs. !important is needed
-     on .theme-toggle-nav because the button carries an inline display style
-     (App.tsx) that would otherwise win over a plain display:none here. */
+     dropped here too, leaving just the four page tabs. !important keeps this
+     display:none robust against .theme-toggle-nav's own display:inline-flex
+     declared above (same-specificity, earlier in the file — see CLAUDE.md's
+     cascade-order note). */
   .page-nav-title {
     display: none;
   }
@@ -1083,7 +1070,7 @@ a:hover {
   width: 100%;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   .mobile-profile {
     /* Bleeds out to the true viewport edge on all three outer sides, past
        .outer-padding's inset — padding above already matches .outer-padding's
@@ -1097,7 +1084,7 @@ a:hover {
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   .mobile-profile {
     display: flex;
   }
@@ -1156,19 +1143,16 @@ a:hover {
   color: var(--primary);
 }
 
-.mobile-name-last {
-  font-weight: 700;
-}
-
 .mobile-name-alt {
   font-family: var(--font-heading);
-  font-size: 1.2rem;
-  color: var(--text-secondary);
+  font-size: 1.5rem;
+  color: var(--primary);
 }
 
 .mobile-theme-btn {
   background: none;
   border: none;
+  border-radius: 50%;
   color: var(--primary);
   font-size: 1.1rem;
   cursor: pointer;
@@ -1187,29 +1171,6 @@ a:hover {
   height: 1.8rem;
   font-size: 0.9rem;
 }
-
-/* Compact Section Styling for About page */
-.compact-card {
-  padding: 1.25rem !important;
-  margin-bottom: 1.25rem !important;
-  border-radius: 1rem !important;
-}
-
-.compact-card h2 {
-  font-size: 1.5rem !important;
-  margin-bottom: 1rem !important;
-}
-
-.compact-card h3 {
-  font-size: 1.15rem !important;
-}
-
-.compact-card p,
-.compact-card li {
-  font-size: 0.95rem !important;
-  line-height: 1.5 !important;
-}
-
 
 /* Compact home sections rules */
 .compact-sections section {
@@ -1341,6 +1302,15 @@ a:hover {
   padding: var(--glass-padding) 0;
 }
 
+/* Divider between items, not after the last one — was a per-item computed
+   inline style (index < length - 1) in News/Publications/Service; a plain
+   :not(:last-child) does the same thing declaratively. */
+.news-item:not(:last-child),
+.pub-entry:not(:last-child),
+.service-entry:not(:last-child) {
+  border-bottom: 1px solid var(--glass-border);
+}
+
 .news-date {
   font-weight: 700;
   color: var(--primary);
@@ -1444,7 +1414,7 @@ a:hover {
   border-radius: 2rem !important;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1199.98px) {
   .page-glass {
     padding: 0 !important;
     border: none !important;
@@ -1460,14 +1430,16 @@ a:hover {
 .social-icon-btn,
 .btn,
 .page-nav-link,
-.theme-toggle-nav {
+.theme-toggle-nav,
+.mobile-theme-btn {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .social-icon-btn:hover,
 .btn:hover,
 .page-nav-link:hover,
-.theme-toggle-nav:hover {
+.theme-toggle-nav:hover,
+.mobile-theme-btn:hover {
   background-color: var(--primary) !important;
   color: #ffffff !important;
   border-color: var(--primary) !important;
@@ -1476,7 +1448,8 @@ a:hover {
 [data-theme='dark'] .social-icon-btn:hover,
 [data-theme='dark'] .btn:hover,
 [data-theme='dark'] .page-nav-link:hover,
-[data-theme='dark'] .theme-toggle-nav:hover {
+[data-theme='dark'] .theme-toggle-nav:hover,
+[data-theme='dark'] .mobile-theme-btn:hover {
   background-color: var(--primary) !important;
   color: #002147 !important;
   border-color: var(--primary) !important;
@@ -1532,9 +1505,14 @@ a:hover {
   margin-bottom: 0.25rem;
 }
 
+/* Overrides the mobile h1/h2/h3 { text-align: left !important } rule
+   (justify reads badly on short, few-word section headings, but paper
+   titles are long enough — several words per line, like body copy — that
+   justify looks fine and was requested explicitly for this field). */
 .pub-entry h3.pub-title {
   color: var(--primary);
   margin-bottom: 0.5rem;
+  text-align: justify !important;
 }
 
 .pub-authors {
@@ -1597,15 +1575,6 @@ a:hover {
 /* Remove trailing section margin inside wrapping containers */
 section:last-child,
 .compact-sections section:last-child {
-  margin-bottom: 0 !important;
-}
-
-/* Normalize markdown layout margins inside cards */
-.markdown-body>*:first-child {
-  margin-top: 0 !important;
-}
-
-.markdown-body>*:last-child {
   margin-bottom: 0 !important;
 }
 

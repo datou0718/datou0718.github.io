@@ -4,14 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import { useLayout } from '../context/LayoutContext';
-
-interface PostMeta {
-    id: string;
-    title: string;
-    date: string;
-    description: string;
-    file: string;
-}
+import type { PostMeta } from '../types/content';
 
 // Eagerly glob import all markdown posts at compile time to prevent runtime fetch failures.
 const postsContent = import.meta.glob('../posts/*.md', { query: '?raw', import: 'default', eager: true });
@@ -37,6 +30,14 @@ const getParagraphText = (node: any): string => {
     if (node && node.props && node.props.children) return getParagraphText(node.props.children);
     return '';
 };
+
+// Slugified-id heading renderer shared by h1-h6 so TOC links resolve consistently.
+const makeHeadingRenderer = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') =>
+    ({ children }: { children?: React.ReactNode }) => {
+        const text = getParagraphText(children);
+        const id = slugify(text);
+        return <Tag id={id}>{children}</Tag>;
+    };
 
 const PostView: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -208,36 +209,12 @@ const PostView: React.FC = () => {
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkBreaks]}
                         components={{
-                            h1: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h1 id={id}>{children}</h1>;
-                            },
-                            h2: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h2 id={id}>{children}</h2>;
-                            },
-                            h3: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h3 id={id}>{children}</h3>;
-                            },
-                            h4: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h4 id={id}>{children}</h4>;
-                            },
-                            h5: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h5 id={id}>{children}</h5>;
-                            },
-                            h6: ({ children }) => {
-                                const text = getParagraphText(children);
-                                const id = slugify(text);
-                                return <h6 id={id}>{children}</h6>;
-                            },
+                            h1: makeHeadingRenderer('h1'),
+                            h2: makeHeadingRenderer('h2'),
+                            h3: makeHeadingRenderer('h3'),
+                            h4: makeHeadingRenderer('h4'),
+                            h5: makeHeadingRenderer('h5'),
+                            h6: makeHeadingRenderer('h6'),
                             a: ({ node, href, children, ...props }) => {
                                 if (href && href.startsWith('#')) {
                                     return (

@@ -49,13 +49,7 @@ export const News: React.FC = () => {
             <div className="glass-card news-card">
                 <div className="news-scroll-list" ref={listRef} style={{ maxHeight }}>
                     {typedNewsData.map((item, index) => (
-                        <div
-                            key={index}
-                            className="news-item"
-                            style={{
-                                borderBottom: index < typedNewsData.length - 1 ? '1px solid var(--glass-border)' : 'none',
-                            }}
-                        >
+                        <div key={index} className="news-item">
                             <span className="news-date">{item.date}</span>
                             <span className="news-content">{item.content}</span>
                         </div>
@@ -66,55 +60,40 @@ export const News: React.FC = () => {
     );
 };
 
-const institutionDetails: Record<string, { url: string; color: string; darkColor: string; fallbackText: string; logo: string }> = {
+const institutionDetails: Record<string, { fallbackText: string; logo: string; bgClass: string }> = {
     "Duke University": {
-        url: "https://www.duke.edu/",
-        color: "#003087",
-        darkColor: "#66a3ff",
         fallbackText: "D",
-        logo: "/logos/duke.svg"
+        logo: "/logos/duke.svg",
+        bgClass: "bg-duke"
     },
     "National Taiwan University": {
-        url: "https://www.ntu.edu.tw/",
-        color: "#970302",
-        darkColor: "#ff6b6b",
         fallbackText: "NTU",
-        logo: "/logos/ntu.png"
+        logo: "/logos/ntu.png",
+        bgClass: "bg-ntu"
     },
     "University of Notre Dame": {
-        url: "https://www.nd.edu/",
-        color: "#0c2340",
-        darkColor: "#f1c40f",
         fallbackText: "ND",
-        logo: "/logos/notredame.svg"
+        logo: "/logos/notredame.svg",
+        bgClass: "bg-notredame"
     },
     "Academia Sinica": {
-        url: "https://www.sinica.edu.tw/",
-        color: "#1f4e79",
-        darkColor: "#3a86c8",
         fallbackText: "AS",
-        logo: "/logos/sinica.svg"
+        logo: "/logos/sinica.svg",
+        bgClass: "bg-sinica"
     }
 };
 
 const TimelineLogo: React.FC<{ institution: string }> = ({ institution }) => {
     const [imgError, setImgError] = React.useState(false);
     const details = institutionDetails[institution] || {
-        url: "#",
-        color: "var(--primary)",
-        darkColor: "var(--primary)",
         fallbackText: institution.charAt(0),
-        logo: ""
+        logo: "",
+        bgClass: ""
     };
-
-    const bgClass = institution.includes("Duke") ? "bg-duke" :
-        institution.includes("Taiwan") ? "bg-ntu" :
-            institution.includes("Notre Dame") ? "bg-notredame" :
-                institution.includes("Academia Sinica") ? "bg-sinica" : "";
 
     if (imgError || !details.logo) {
         return (
-            <div className={`timeline-logo-fallback ${bgClass}`} style={!bgClass ? { backgroundColor: 'var(--primary)' } : undefined}>
+            <div className={`timeline-logo-fallback ${details.bgClass}`} style={!details.bgClass ? { backgroundColor: 'var(--primary)' } : undefined}>
                 {details.fallbackText}
             </div>
         );
@@ -169,61 +148,47 @@ const TimelineRow: React.FC<TimelineItemProps & { isLast: boolean }> = ({ title,
     </div>
 );
 
+/** Shared by Education/Experience/SelectedAwards/Teaching below — each just
+ *  maps its own content array's field names onto TimelineRow's shape. */
+function TimelineSection<T>({ heading, items, map }: {
+    heading: string;
+    items: T[];
+    map: (item: T) => TimelineItemProps;
+}) {
+    return (
+        <section className="fade-in">
+            <h2>{heading}</h2>
+            <div className="glass-card section-card">
+                {items.map((item, index) => (
+                    <TimelineRow key={index} {...map(item)} isLast={index === items.length - 1} />
+                ))}
+            </div>
+        </section>
+    );
+}
+
 export const Education: React.FC = () => (
-    <section className="fade-in">
-        <h2>Education</h2>
-        <div className="glass-card section-card">
-            {content.education.map((item, index) => (
-                <TimelineRow
-                    key={index}
-                    title={item.degree}
-                    time={item.year}
-                    affiliation={item.institution}
-                    location={item.location}
-                    note={item.details}
-                    isLast={index === content.education.length - 1}
-                />
-            ))}
-        </div>
-    </section>
+    <TimelineSection
+        heading="Education"
+        items={content.education}
+        map={(item) => ({ title: item.degree, time: item.year, affiliation: item.institution, location: item.location, note: item.details })}
+    />
 );
 
 export const Experience: React.FC = () => (
-    <section className="fade-in">
-        <h2>Experience</h2>
-        <div className="glass-card section-card">
-            {content.experience.map((item, index) => (
-                <TimelineRow
-                    key={index}
-                    title={item.role}
-                    time={item.time}
-                    affiliation={item.institution}
-                    location={item.location}
-                    note={item.details}
-                    isLast={index === content.experience.length - 1}
-                />
-            ))}
-        </div>
-    </section>
+    <TimelineSection
+        heading="Experience"
+        items={content.experience}
+        map={(item) => ({ title: item.role, time: item.time, affiliation: item.institution, location: item.location, note: item.details })}
+    />
 );
 
 export const SelectedAwards: React.FC = () => (
-    <section className="fade-in">
-        <h2>Selected Awards</h2>
-        <div className="glass-card section-card">
-            {content.awards.map((item, index) => (
-                <TimelineRow
-                    key={index}
-                    title={item.name}
-                    time={item.year}
-                    affiliation={item.organization}
-                    location={item.location}
-                    note={item.description}
-                    isLast={index === content.awards.length - 1}
-                />
-            ))}
-        </div>
-    </section>
+    <TimelineSection
+        heading="Selected Awards"
+        items={content.awards}
+        map={(item) => ({ title: item.name, time: item.year, affiliation: item.organization, location: item.location, note: item.description })}
+    />
 );
 
 export const Publications: React.FC<{ title?: string; selectedOnly?: boolean }> = ({ title = "Publications", selectedOnly = false }) => {
@@ -240,7 +205,7 @@ export const Publications: React.FC<{ title?: string; selectedOnly?: boolean }> 
             <div className="glass-card">
                 <div>
                     {filteredPubs.slice(0, visibleCount).map((pub, index) => (
-                        <div key={index} className="pub-entry" style={{ borderBottom: index < filteredPubs.slice(0, visibleCount).length - 1 ? '1px solid var(--glass-border)' : 'none' }}>
+                        <div key={index} className="pub-entry">
                             {pub.status && (
                                 <div className="pub-status">
                                     {pub.status}
@@ -296,22 +261,11 @@ export const Publications: React.FC<{ title?: string; selectedOnly?: boolean }> 
 };
 
 export const Teaching: React.FC = () => (
-    <section className="fade-in">
-        <h2>Teaching</h2>
-        <div className="glass-card section-card">
-            {content.teaching.map((item, index) => (
-                <TimelineRow
-                    key={index}
-                    title={item.course}
-                    time={item.year}
-                    affiliation={item.institution}
-                    location={item.location}
-                    note={item.details}
-                    isLast={index === content.teaching.length - 1}
-                />
-            ))}
-        </div>
-    </section>
+    <TimelineSection
+        heading="Teaching"
+        items={content.teaching}
+        map={(item) => ({ title: item.course, time: item.year, affiliation: item.institution, location: item.location, note: item.details })}
+    />
 );
 
 export const Service: React.FC = () => (
@@ -320,7 +274,7 @@ export const Service: React.FC = () => (
         <div className="glass-card">
             <div>
                 {content.service.map((item, index) => (
-                    <div key={index} className="mobile-stack service-entry" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: index < content.service.length - 1 ? '1px solid var(--glass-border)' : 'none', gap: '1rem' }}>
+                    <div key={index} className="mobile-stack service-entry" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                         <div>
                             <p style={{ fontWeight: 700, margin: 0 }}>{item.role}</p>
                             <p className="text-secondary" style={{ margin: 0 }}>{item.organization}</p>

@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-interface PostMeta {
-    id: string;
-    title: string;
-    date: string;
-    description: string;
-    file: string;
-}
+import type { PostMeta } from '../types/content';
 
 const PostsList: React.FC = () => {
     const [posts, setPosts] = useState<PostMeta[]>([]);
