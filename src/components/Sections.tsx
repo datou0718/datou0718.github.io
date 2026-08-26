@@ -80,6 +80,11 @@ const institutionDetails: Record<string, { fallbackText: string; logo: string; b
         fallbackText: "AS",
         logo: "/logos/sinica.svg",
         bgClass: "bg-sinica"
+    },
+    "Irving T. Ho Memorial Foundation": {
+        fallbackText: "ITH",
+        logo: "/logos/irving-t-ho-foundation.png",
+        bgClass: ""
     }
 };
 

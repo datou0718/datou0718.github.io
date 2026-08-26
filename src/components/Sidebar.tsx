@@ -58,11 +58,15 @@ const Sidebar: React.FC = () => {
         )}
 
         <div className="name-section">
-          {/* Name */}
-          <h2>{content.name.english}</h2>
-          <h3>{content.name.chinese}</h3>
-          <p className="sidebar-title">{content.title}</p>
-          <p className="sidebar-affiliation">{content.education[0].institution}</p>
+          <div className="sidebar-identity">
+            <h2>{content.name.english}</h2>
+            <h3>{content.name.chinese}</h3>
+          </div>
+
+          <div className="sidebar-details">
+            <p className="sidebar-title">{content.title}</p>
+            <p className="sidebar-affiliation">{content.education[0].institution}</p>
+          </div>
 
           {/* Profile links row (includes email as icon) */}
           <div className="social-row">
