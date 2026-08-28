@@ -6,7 +6,7 @@ export const content = {
     english: "Yi-Chun Liao",
     chinese: "廖奕鈞"
   },
-  title: "Ph.D. Student in ECE",
+  title: "Ph.D. Student in Duke ECE",
   email: "yi-chun.liao@duke.edu",
   headshot: "/assets/me.jpg",
   cv: "/assets/CV.pdf",

@@ -65,7 +65,6 @@ const Sidebar: React.FC = () => {
 
           <div className="sidebar-details">
             <p className="sidebar-title">{content.title}</p>
-            <p className="sidebar-affiliation">{content.education[0].institution}</p>
           </div>
 
           {/* Profile links row (includes email as icon) */}
