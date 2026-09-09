@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import CeiWordmark from './CeiWordmark';
 import { ThemeToggleIcon } from './ThemeToggleIcon';
 
 interface NavRowProps {
@@ -25,6 +26,7 @@ const NavRow: React.FC<NavRowProps> = ({ theme, toggleTheme }) => {
 
   return (
     <div className="page-nav-row">
+      <CeiWordmark className="nav-cei-wordmark" />
       <h1 className="page-nav-title">{title}</h1>
       <nav className="page-nav-tabs">
         <Link to="/" className={`page-nav-link ${isAboutActive ? 'active' : ''}`}>

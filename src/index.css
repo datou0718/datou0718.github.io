@@ -43,12 +43,22 @@
      larger, independent 2rem. */
   --glass-padding: 1rem;
 
-  /* Sidebar profile-link icon row — avatar width is derived from these so it
-     always spans exactly as wide as the icon row below it. --icon-count must
+  /* Sidebar profile-link row. These values are intentionally independent of
+     the CEI wordmark and navigation controls. --profile-icon-count must
      match the number of icons ProfileLinks renders (Sidebar.tsx). */
-  --icon-size: 2.2rem;
-  --icon-gap: 0.5rem;
-  --icon-count: 6;
+  --profile-icon-size: 2.2rem;
+  --profile-icon-gap: 0.5rem;
+  --profile-icon-count: 6;
+  --sidebar-profile-width: calc(var(--profile-icon-count) * var(--profile-icon-size) + (var(--profile-icon-count) - 1) * var(--profile-icon-gap));
+
+  /* The CEI artwork, title line, and outer nav controls share this height.
+     Labels/icons inside the controls are intentionally smaller. */
+  --nav-title-size: 1.875rem;
+  --nav-label-size: 1.15rem;
+  --nav-control-height: 2.2rem;
+  --nav-logo-width: 19.74rem;
+  --desktop-nav-sticky-top: 1rem;
+  --desktop-nav-height: calc(var(--nav-control-height) + 2rem);
 
   /* Experience/Education/Awards/Teaching timeline icon circle */
   --exp-icon-size: 4rem;
@@ -632,6 +642,8 @@ a:hover {
   flex-wrap: wrap;
   min-width: 0;
   gap: 2rem;
+  position: relative;
+  z-index: 0;
 }
 
 .sidebar-col {
@@ -646,6 +658,12 @@ a:hover {
 }
 
 @media (min-width: 1200px) {
+  :root {
+    --profile-icon-size: 2.25rem;
+    --profile-icon-gap: 0.55rem;
+    --nav-control-height: 1.875rem;
+  }
+
   .sidebar-col {
     display: block;
   }
@@ -653,16 +671,13 @@ a:hover {
 
 .sidebar-affix {
   position: sticky;
-  /* Matches .page-nav-row's constant top padding so the avatar's top edge
-     lines up with the top of the nav bar's text once both are stuck while scrolling. */
-  top: 1rem;
-  /* .page-nav-row's background now bleeds under the sidebar's width too (see
-     its own comment — needed so scrolling content's box-shadow can't leak
-     through there), which puts it in the same x,y region as this sticky
-     avatar once both are stuck. Without a z-index above .page-nav-row's 100,
-     that bled background — not this element — was what actually painted on
-     top there (confirmed via elementFromPoint), visually clipping the top of
-     the avatar during scroll instead of the two sitting cleanly side by side. */
+  /* Keep the avatar below the CEI wordmark when both the sidebar and nav are
+     stuck. The 1.5rem matches .page-nav-row's bottom margin. */
+  top: calc(var(--desktop-nav-sticky-top) + var(--desktop-nav-height) + 1.5rem);
+  max-height: var(--sidebar-available-height);
+  display: flex;
+  flex-direction: column;
+  /* Keep the profile above scrolling content while leaving it below the nav. */
   z-index: 101;
 }
 
@@ -671,14 +686,21 @@ a:hover {
 }
 
 .sidebar-inner {
-  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 0 0.75rem;
   text-align: center;
 }
 
-/* Avatar width is derived from the icon row below it (--icon-size/--icon-gap/
-   --icon-count) so the two can never drift out of sync again. */
+.sidebar-inner > :not(.toc-area) {
+  flex-shrink: 0;
+}
+
+/* Avatar width follows the smaller profile-link row, not the CEI wordmark. */
 .profile-avatar {
-  width: calc(var(--icon-count) * var(--icon-size) + (var(--icon-count) - 1) * var(--icon-gap));
+  width: var(--sidebar-profile-width);
   aspect-ratio: 1;
   border-radius: 1.5rem;
   /* Match the spacing used between the sidebar's semantic groups. */
@@ -690,7 +712,7 @@ a:hover {
 }
 
 .profile-avatar-placeholder {
-  width: calc(var(--icon-count) * var(--icon-size) + (var(--icon-count) - 1) * var(--icon-gap));
+  width: var(--sidebar-profile-width);
   aspect-ratio: 1;
   border-radius: 1.5rem;
   margin: 0 auto 0.875rem auto;
@@ -730,7 +752,7 @@ a:hover {
 
 .name-section h2 {
   font-family: var(--font-heading);
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 400;
   letter-spacing: 1px;
   margin: 0;
@@ -745,7 +767,7 @@ a:hover {
 
 .name-section h3 {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 400;
   color: var(--primary);
   margin: 0;
@@ -753,7 +775,7 @@ a:hover {
 }
 
 .sidebar-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 400;
   color: var(--text-secondary);
   text-align: center;
@@ -776,13 +798,13 @@ a:hover {
 .social-links {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--icon-gap);
+  gap: var(--profile-icon-gap);
   justify-content: center;
 }
 
 .social-icon-btn {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: var(--profile-icon-size);
+  height: var(--profile-icon-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -809,33 +831,50 @@ a:hover {
 
 /* Table of Contents in Sidebar */
 .toc-area {
-  margin-top: 1.5rem;
+  /* Match the centered avatar and profile-link row instead of sizing to text. */
+  width: min(100%, var(--sidebar-profile-width));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Include the gap formerly supplied by .name-section. Clip this spacing
+     too when the profile leaves no room for the TOC. */
+  padding-top: calc(1.5rem + 0.875rem);
+  overflow: hidden;
   text-align: left;
 }
 
 .toc-area hr {
+  flex-shrink: 0;
+  width: 100%;
   border: none;
   border-top: 1px solid var(--glass-border);
   margin-bottom: 1.25rem;
 }
 
 .toc-nav {
-  max-height: calc(100vh - 460px);
-  overflow-y: auto;
-  padding-right: 0.5rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .toc-nav h3 {
+  flex-shrink: 0;
   font-size: 1rem;
   font-weight: 700;
   color: var(--primary);
   margin-bottom: 0.5rem;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .toc-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   list-style: none;
   padding-left: 0;
+  padding-right: 0.5rem;
   border-left: 1px solid var(--glass-border);
 }
 
@@ -869,72 +908,123 @@ a:hover {
 
 /* Sticky Navigation Tab Row */
 .page-nav-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr) auto;
+  column-gap: 2rem;
   align-items: center;
-  justify-content: space-between;
   position: sticky;
-  /* Stick flush to the real viewport top so there's no uncovered gap above
-     the bar for scrolling content to show through (was top: 3rem, which left
-     the outer-padding + page-glass padding strip exposed once stuck). */
   top: 0;
-  z-index: 100;
-  /* --nav-solid-bg already approximates what a translucent glass card looks
-     like once composited over the page — matches the surrounding cards
-     instead of the flatter, differently-toned --bg-color underneath them. */
+  z-index: 1000;
+  isolation: isolate;
   background: var(--nav-solid-bg);
-  /* padding-left (not margin-left) so this row's own box — and its opaque
-     background — spans the card's FULL padded content width, including the
-     strip above the sidebar, not just above content-col. Content-col cards
-     and .page-glass itself both carry box-shadow (see .glass-card), and
-     their shadow blur radius pokes a few px past the card/box edge; a
-     margin-left-based row that only covered content-col's width left that
-     sliver above the sidebar unpainted, so as inner cards scrolled underneath
-     the fixed bar, their shadow leaked through right at the seam — visible
-     as a thin dark line at both ends of the bar right as it happened. Full
-     padded-width coverage removes any gap for that to leak into — this is
-     purely a paint/coverage concern though, not a visual one: nav-solid-bg
-     already reads as an invisible extension of the card's own background,
-     so painting it under the sidebar too doesn't look like a "bar" there.
-     The border-bottom below is what actually reads as "this is a bar", so
-     it's deliberately scoped narrower via ::after (see below) — visually
-     the bar looks scoped to content-col, while staying shadow-safe underneath. */
-  /* By default this box's right edge stops exactly at content-col's own
-     right edge (page-glass's content box has nothing past content-col on
-     that side to borrow extra width from, unlike the sidebar on the left).
-     content-col's inner .glass-card sections carry box-shadow with a few px
-     of blur past their own edge — with zero buffer there, that blur poked
-     past this row's right edge and leaked through while scrolling, the same
-     bug as the left side but without a sidebar's width to accidentally fix
-     it for free. -2rem margin-right bleeds this box past page-glass's own
-     right padding for coverage; padding-right adds the same 2rem back on
-     the inside so the flex content (the tabs, which justify-content:
-     space-between pins to this box's end edge) stays visually aligned with
-     content-col's edge instead of drifting into the newly-added bleed —
-     mirrored by the ::after's `right: 2rem` below so the border-bottom
-     line lines up with the tabs and title too. */
-  padding: 1rem 2rem 1rem calc(320px + 2rem);
+  /* Bleed to the outer card edges while repeating .layout-grid's exact
+     sidebar/content tracks. This keeps the logo, title, and controls aligned
+     before and after the row becomes sticky. */
+  padding: 1rem 2rem;
+  margin-left: -2rem;
   margin-right: -2rem;
   margin-bottom: 1.5rem;
+  min-height: var(--desktop-nav-height);
+}
+
+/* Exact official CEI vector artwork, recolored through currentColor. */
+.cei-wordmark {
+  display: block;
+  color: var(--primary);
+  line-height: 0;
+  transition: color 0.3s ease, opacity 0.2s ease;
+}
+
+.cei-wordmark:hover {
+  color: var(--primary);
+  opacity: 0.82;
+}
+
+.cei-wordmark:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 0.35rem;
+  border-radius: 0.25rem;
+}
+
+.cei-wordmark-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 488.54 / 43.31;
+  background-color: currentColor;
+  -webkit-mask: url('/logos/cei-wordmark.svg') center / contain no-repeat;
+  mask: url('/logos/cei-wordmark.svg') center / contain no-repeat;
+}
+
+.nav-cei-wordmark {
+  width: var(--nav-logo-width);
+  height: var(--nav-control-height);
+  display: flex;
+  align-items: center;
+  justify-self: center;
 }
 
 @media (min-width: 1200px) {
-  /* Separator line only under content-col (not the full opaque row above —
-     see its own comment) so the nav bar visually reads as scoped to the
-     content column, matching the sidebar having no matching line of its own. */
+  /* The sticky nav draws the desktop page's rounded top edge. Suppress the
+     original scrolling top border so a second straight line can never pass
+     above that curve during the first pixels of scrolling. The transparent
+     border keeps the page geometry unchanged. */
+  .glass-card.page-glass {
+    border-top-color: transparent;
+  }
+
+  .page-nav-row {
+    /* Cover the scrolling card's shadow as well as its border. The visible
+       rounded surface stays inset by this amount, at the original card edge. */
+    --nav-frame-bleed: 1rem;
+    /* Keep the top gap and nav row inside the sticky element's real box.
+       The normal 1.5rem content gap remains outside, so it does not inflate
+       the visible header below the controls. */
+    top: 0;
+    height: calc(var(--desktop-nav-sticky-top) + var(--desktop-nav-height));
+    min-height: 0;
+    margin-top: calc(-2rem - var(--desktop-nav-sticky-top) - 1px);
+    margin-left: calc(-2rem - 1px - var(--nav-frame-bleed));
+    margin-right: calc(-2rem - 1px - var(--nav-frame-bleed));
+    margin-bottom: 1.5rem;
+    padding: calc(var(--desktop-nav-sticky-top) + 1rem) calc(2rem + 1px + var(--nav-frame-bleed)) 1rem;
+    background: var(--bg-color);
+    overflow: clip;
+  }
+
+  /* Rounded page-cap surface, wholly contained inside the sticky box. */
+  .page-nav-row::before {
+    content: '';
+    position: absolute;
+    left: var(--nav-frame-bleed);
+    right: var(--nav-frame-bleed);
+    top: var(--desktop-nav-sticky-top);
+    bottom: 0;
+    z-index: -1;
+    background: var(--nav-solid-bg);
+    border: 1px solid var(--glass-border);
+    border-bottom: 0;
+    border-radius: 2rem 2rem 0 0;
+    box-shadow: var(--shadow);
+    pointer-events: none;
+  }
+
+  /* Put the main-content divider at the bottom of the opaque sticky box. */
   .page-nav-row::after {
     content: '';
     position: absolute;
-    left: calc(320px + 2rem);
-    /* Matches the row's own -2rem margin-right bleed, so the visible line
-       still stops at content-col's edge even though the row itself is wider. */
-    right: 2rem;
+    left: calc(320px + 4rem + 1px + var(--nav-frame-bleed));
+    right: calc(2rem + 1px + var(--nav-frame-bleed));
     bottom: 0;
-    border-bottom: 1px solid var(--glass-border);
+    height: 1px;
+    background: var(--glass-border);
+    pointer-events: none;
   }
 }
 
 @media (max-width: 1199.98px) {
   .page-nav-row {
+    display: flex;
+    justify-content: space-between;
     /* Set from MobileProfile's actual measured height (see its
        useLayoutEffect) so this sits flush underneath it — a hardcoded guess
        here previously undershot the real height and caused the nav row to
@@ -949,53 +1039,68 @@ a:hover {
     /* No sidebar/content-col split on mobile — the line just spans this
        row's own (already full-bleed) width directly, no ::after needed. */
     border-bottom: 1px solid var(--glass-border);
+    min-height: 0;
+  }
+
+  .nav-cei-wordmark {
+    display: none;
   }
 }
 
 .page-nav-title {
   font-family: var(--font-heading);
-  font-size: 1.8rem;
+  font-size: var(--nav-title-size);
   font-weight: 700;
+  line-height: 1;
   color: var(--primary);
   margin: 0;
+  height: var(--nav-control-height);
+  display: flex;
+  align-items: center;
 }
 
 .page-nav-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.35rem;
   align-items: center;
+  height: var(--nav-control-height);
 }
 
 .page-nav-link {
   font-family: var(--font-heading);
-  font-size: 1.05rem;
+  font-size: var(--nav-label-size);
   font-weight: 600;
   color: var(--primary);
   white-space: nowrap;
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.75rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.5rem;
   transition: all 0.2s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1.4;
-  height: 2.3rem;
+  height: var(--nav-control-height);
 }
 
 .theme-toggle-nav {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.05rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.75rem;
+  font-size: var(--nav-label-size);
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1.4;
   color: var(--primary);
-  height: 2.3rem;
+  height: var(--nav-control-height);
+}
+
+.theme-toggle-nav svg {
+  width: var(--nav-label-size);
+  height: var(--nav-label-size);
 }
 
 .page-nav-link:hover {
@@ -1070,8 +1175,9 @@ a:hover {
   /* stretch (not center) so .mobile-avatar can be sized via align-self:stretch
      to exactly span from the top of the name to the bottom of the profile
      links row below it, instead of a fixed small square. */
+  flex-direction: column;
   align-items: stretch;
-  gap: 1rem;
+  gap: 0.625rem;
   padding: 0.75rem 1rem;
   /* Same solid background as .page-nav-row (see its comment) so the two
      sticky bars read as one continuous piece instead of the header looking
@@ -1081,6 +1187,18 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 50;
+  width: 100%;
+}
+
+.mobile-cei-wordmark {
+  width: min(100%, 25rem);
+  margin: 0 auto;
+}
+
+.mobile-profile-main {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
   width: 100%;
 }
 

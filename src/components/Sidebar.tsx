@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { content } from '../data/content';
 import { useLayout } from '../context/LayoutContext';
 
@@ -44,9 +44,37 @@ export const ProfileLinks: React.FC = () => (
 
 const Sidebar: React.FC = () => {
   const { sidebarContent } = useLayout();
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const sidebar = sidebarRef.current;
+    const column = sidebar?.parentElement;
+    if (!sidebar || !column) return;
+
+    // A sticky box is pushed upward when it reaches its column's bottom.
+    // Give the TOC only the space above that boundary, preserving the profile.
+    const syncHeight = () => {
+      if (!column.getClientRects().length) return;
+      const { top, bottom } = column.getBoundingClientRect();
+      const stickyTop = parseFloat(getComputedStyle(sidebar).top);
+      const available = Math.max(0, Math.min(window.innerHeight, bottom) - Math.max(stickyTop, top));
+      sidebar.style.setProperty('--sidebar-available-height', `${available}px`);
+    };
+
+    syncHeight();
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(column);
+    window.addEventListener('scroll', syncHeight, { passive: true });
+    window.addEventListener('resize', syncHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', syncHeight);
+      window.removeEventListener('resize', syncHeight);
+    };
+  }, []);
 
   return (
-    <div className="sidebar-wrap">
+    <div className="sidebar-wrap sidebar-affix" ref={sidebarRef}>
       <aside className="sidebar-inner">
         {/* Avatar */}
         {content.headshot ? (
@@ -71,15 +99,15 @@ const Sidebar: React.FC = () => {
           <div className="social-row">
             <ProfileLinks />
           </div>
-
-          {/* Dynamic Content (Table of Contents) */}
-          {sidebarContent && (
-            <div className="toc-area">
-              <hr />
-              {sidebarContent}
-            </div>
-          )}
         </div>
+
+        {/* The TOC can shrink independently of the avatar and profile details. */}
+        {sidebarContent && (
+          <div className="toc-area">
+            <hr />
+            {sidebarContent}
+          </div>
+        )}
       </aside>
     </div>
   );

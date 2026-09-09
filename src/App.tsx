@@ -51,9 +51,7 @@ const AppContent: React.FC = () => {
           <div className="layout-grid">
             {/* Left Column (Sidebar) */}
             <div className="sidebar-col">
-              <div className="sidebar-affix">
-                <Sidebar />
-              </div>
+              <Sidebar />
             </div>
 
             {/* Right Column (Content) */}
