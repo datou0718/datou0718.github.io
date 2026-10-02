@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { LayoutProvider } from './context/LayoutContext';
 import Sidebar from './components/Sidebar';
 import MobileProfile from './components/MobileProfile';
@@ -16,6 +16,7 @@ import ExperiencePage from './pages/ExperiencePage';
 import PublicationsPage from './pages/PublicationsPage';
 import PostsList from './pages/PostsList';
 import PostView from './pages/PostView';
+import Seo from './components/Seo';
 
 const Home: React.FC = () => (
   <main className="compact-sections">
@@ -40,6 +41,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="outer-padding">
+      <Seo />
       {/* Mobile Sticky Header */}
       <MobileProfile theme={theme} toggleTheme={toggleTheme} />
 
@@ -62,6 +64,12 @@ const AppContent: React.FC = () => {
                 <Route path="/publications" element={<PublicationsPage />} />
                 <Route path="/posts" element={<PostsList />} />
                 <Route path="/posts/:id" element={<PostView />} />
+                <Route path="*" element={
+                  <div className="fade-in">
+                    <h1>Page not found</h1>
+                    <Link to="/">Return to About</Link>
+                  </div>
+                } />
               </Routes>
             </div>
           </div>
@@ -77,9 +85,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <LayoutProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <AppContent />
     </LayoutProvider>
   );
 };

@@ -16,10 +16,11 @@ export const content = {
     linkedin: "https://www.linkedin.com/in/yi-chun-liao-07b414269/",
     instagram: "https://www.instagram.com/datou_0718/",
   },
-  bio: "I am a first-year Ph.D. student in the [CEI Lab](https://cei.pratt.duke.edu/) of the [Department of Electrical and Computer Engineering](https://ece.duke.edu/) at [Duke University](https://www.duke.edu/), advised by [Prof. Yiran Chen](https://ece.duke.edu/people/yiran-chen/). I enjoy exploring in-memory computing through algorithm-hardware co-design, accelerating various applications such as retrieval-augmented generation and tree-based machine learning. Before joining the CEI Lab, I had the privilege of working with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/), [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/) and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
+bio: "I am a first-year Ph.D. student in the [CEI Lab](https://cei.pratt.duke.edu/) within the [Department of Electrical and Computer Engineering](https://ece.duke.edu/) at [Duke University](https://www.duke.edu/), advised by [Prof. Yiran Chen](https://ece.duke.edu/people/yiran-chen/) and [Prof. Hai \"Helen\" Li](https://ece.duke.edu/people/hai-helen-li/). I also collaborate extensively with [Prof. X. Sharon Hu](https://sites.nd.edu/xsharon-hu/) at the [University of Notre Dame](https://www.nd.edu/). My research centers on a fundamental question: ***Is in-memory computing the future of computer architecture?*** I demystify this question by exploring potential applications, improving performance robustness, and enhancing resource efficiency of in-memory computing architectures. Before joining the CEI Lab, I had the privilege of working with [Prof. Tei-Wei Kuo](https://www.csie.ntu.edu.tw/~ktw/) and [Prof. Yuan-Hao Chang](https://www.csie.ntu.edu.tw/~johnson/) at [National Taiwan University](https://www.ntu.edu.tw/).",
   researchInterests: [
     "In-Memory Computing",
     "Algorithm-Hardware Co-Design",
+    "Content-Addressable Memory"
   ],
   education: [
     {

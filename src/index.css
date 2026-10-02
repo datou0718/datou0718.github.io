@@ -486,6 +486,13 @@ a:hover {
   color: var(--text-primary);
 }
 
+/* The bold, italic research question in the biography. */
+.bio-text em strong,
+.bio-text strong em {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+}
+
 .markdown-body a {
   color: var(--primary);
   text-decoration: none;

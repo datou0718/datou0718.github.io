@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import { useLayout } from '../context/LayoutContext';
-import type { PostMeta } from '../types/content';
+import postsData from '../data/posts.json';
 
 // Eagerly glob import all markdown posts at compile time to prevent runtime fetch failures.
 const postsContent = import.meta.glob('../posts/*.md', { query: '?raw', import: 'default', eager: true });
@@ -39,81 +39,45 @@ const makeHeadingRenderer = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') =>
         return <Tag id={id}>{children}</Tag>;
     };
 
+const parseHeadings = (text: string) => {
+    // Strip code blocks first to avoid matching headings in code
+    const strippedText = text.replace(/```[\s\S]*?```/g, '');
+    const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+    const list: Array<{ id: string; text: string; depth: number }> = [];
+    let match;
+    while ((match = headingRegex.exec(strippedText)) !== null) {
+        const depth = match[1].length;
+        // Clean up basic markdown formatting from heading text to display clean text in TOC
+        const headingText = match[2].replace(/[\*\_`#]/g, '').trim();
+        const headingId = slugify(headingText);
+        list.push({ id: headingId, text: headingText, depth });
+    }
+    return list;
+};
+
 const PostView: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [meta, setMeta] = useState<PostMeta | null>(null);
-    const [content, setContent] = useState<string>('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const [headings, setHeadings] = useState<Array<{ id: string; text: string; depth: number }>>([]);
+    const { hash } = useLocation();
+    // These files are already bundled; synchronous reads also make the full post
+    // available to the static renderer instead of an unindexable loading screen.
+    const meta = postsData.find(post => post.id === id);
+    const content = meta ? (postsContent[`../posts/${meta.file}`] as string | undefined) ?? '' : '';
+    const error = !meta ? 'Post not found' : !content ? 'Could not load markdown file from bundle' : null;
+    const headings = useMemo(() => parseHeadings(content), [content]);
     const [activeId, setActiveId] = useState<string>('');
     const { setSidebarContent } = useLayout();
 
-    const parseHeadings = (text: string) => {
-        // Strip code blocks first to avoid matching headings in code
-        const strippedText = text.replace(/```[\s\S]*?```/g, '');
-        const headingRegex = /^(#{1,6})\s+(.+)$/gm;
-        const list: Array<{ id: string; text: string; depth: number }> = [];
-        let match;
-        while ((match = headingRegex.exec(strippedText)) !== null) {
-            const depth = match[1].length;
-            // Clean up basic markdown formatting from heading text to display clean text in TOC
-            const headingText = match[2].replace(/[\*\_`#]/g, '').trim();
-            const headingId = slugify(headingText);
-            list.push({ id: headingId, text: headingText, depth });
-        }
-        return list;
-    };
-
     useEffect(() => {
-        const loadPost = async () => {
+        if (!hash) return;
+        const timeout = window.setTimeout(() => {
             try {
-                // 1. Fetch metadata to get the filename
-                const metaModule = await import('../data/posts.json');
-                const postMeta = metaModule.default.find((p: PostMeta) => p.id === id);
-
-                if (!postMeta) {
-                    setError("Post not found");
-                    setLoading(false);
-                    return;
-                }
-
-                setMeta(postMeta);
-
-                // 2. Load the actual markdown file from eagerness glob import
-                const filePath = `../posts/${postMeta.file}`;
-                const text = postsContent[filePath] as string;
-                if (!text) throw new Error("Could not load markdown file from bundle");
-
-                setContent(text);
-                setHeadings(parseHeadings(text));
-                setLoading(false);
-
-                // After content loads, wait a tick for ReactMarkdown to render and then scroll
-                setTimeout(() => {
-                    const fullHash = window.location.hash; // e.g. "#/posts/application_sharing#前言"
-                    const hashParts = fullHash.split('#');
-                    if (hashParts.length >= 3) {
-                        const targetId = hashParts.slice(2).join('#'); // Everything after the second #
-                        try {
-                            const decodedId = decodeURIComponent(targetId);
-                            const element = document.getElementById(decodedId);
-                            if (element) {
-                                element.scrollIntoView({ behavior: 'smooth' });
-                            }
-                        } catch (err) { }
-                    }
-                }, 100);
-            } catch (err: any) {
-                console.error("Error loading post:", err);
-                setError(err.message || "An error occurred");
-                setLoading(false);
+                document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView({ behavior: 'smooth' });
+            } catch {
+                // A malformed fragment should not prevent the article loading.
             }
-        };
-
-        if (id) loadPost();
-    }, [id]);
+        }, 100);
+        return () => window.clearTimeout(timeout);
+    }, [id, hash]);
 
     // IntersectionObserver to highlight current active heading in TOC
     useEffect(() => {
@@ -161,10 +125,7 @@ const PostView: React.FC = () => {
                                         if (element) {
                                             element.scrollIntoView({ behavior: 'smooth' });
                                             setActiveId(heading.id);
-                                            const hashParts = window.location.hash.split('#');
-                                            if (hashParts.length >= 2) {
-                                                window.history.pushState(null, '', `#${hashParts[1]}#${heading.id}`);
-                                            }
+                                            window.history.pushState(null, '', `#${encodeURIComponent(heading.id)}`);
                                         }
                                     }}
                                 >
@@ -181,16 +142,12 @@ const PostView: React.FC = () => {
         };
     }, [headings, activeId, setSidebarContent]);
 
-    if (loading) {
-        return <div style={{ paddingTop: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading post...</div>;
-    }
-
     if (error || !meta) {
         return (
             <div className="fade-in" style={{ paddingTop: '4rem', textAlign: 'center' }}>
                 <h1 style={{ color: 'var(--primary)' }}>Oops!</h1>
                 <p className="text-secondary">{error || "Post not found"}</p>
-                <Link to="/posts" className="glass-card btn" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', marginTop: '2rem', textDecoration: 'none', color: 'var(--text-primary)', fontWeight: 600, borderRadius: '0.75rem' }}>
+                <Link to="/posts/" className="glass-card btn" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', marginTop: '2rem', textDecoration: 'none', color: 'var(--text-primary)', fontWeight: 600, borderRadius: '0.75rem' }}>
                     Return to Posts
                 </Link>
             </div>

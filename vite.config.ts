@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { content } from './src/data/content'
+import { renderSeoHead } from './src/seo'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,10 +9,8 @@ export default defineConfig({
     {
       name: 'html-transform',
       transformIndexHtml(html) {
-        const rawName = content.name.english;
-        return html
-          .replace('__TITLE__', `${rawName}'s Homepage`)
-          .replace('__DESCRIPTION__', content.title.replace(/"/g, '&quot;'));
+        return html.replace(/<!--seo:start-->[\s\S]*?<!--seo:end-->/,
+          () => `<!--seo:start-->\n  ${renderSeoHead('/')}\n  <!--seo:end-->`);
       },
     }
   ],

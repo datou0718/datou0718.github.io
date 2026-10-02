@@ -1,7 +1,8 @@
 # Project notes: Yi-Chun Liao's academic homepage
 
-Personal academic website. React + TypeScript + Vite, `HashRouter` (so it deploys
-as a static site on GitHub Pages with no server-side routing). No test suite.
+Personal academic website. React + TypeScript + Vite, `BrowserRouter` with
+build-time static HTML for each route, so GitHub Pages needs no runtime server.
+Old `HashRouter` links are migrated in `src/main.tsx`. No test suite.
 
 ## Environment
 
@@ -49,11 +50,16 @@ as a static site on GitHub Pages with no server-side routing). No test suite.
   `.glass-card.page-glass` → `NavRow` (sticky tab bar, defined inline in
   `App.tsx`) + `.layout-grid` → `.sidebar-col` (desktop `Sidebar`, hidden
   `<1200px`) + `.content-col` (routed pages).
-- Routes (`HashRouter`): `/` → About (`Bio`, `News`, `ResearchInterests`,
+- Routes (`BrowserRouter`, with trailing slashes in links): `/` → About (`Bio`, `News`, `ResearchInterests`,
   `Publications selectedOnly`, `VisitorMap`, all from `Sections.tsx`),
   `/experience` → `ExperiencePage.tsx` (`Education`, `Experience`,
   `SelectedAwards`, `Teaching`), `/publications` → `PublicationsPage.tsx`
   (`Publications` full list), `/posts` and `/posts/:id` → `PostsList`/`PostView`.
+- `src/entry-server.tsx` + `scripts/prerender.mjs` render those same components
+  at build time. `src/seo.ts` owns metadata and the list of generated paths.
+  Keep rendered content available without browser-only APIs during rendering;
+  access `window`/`document` in effects or guard it. The client hydrates the
+  generated HTML, so the first client render must agree with the static render.
 - `src/components/Sections.tsx` is the biggest file — holds most About/
   Experience/Publications section components and the shared `TimelineRow`.
 - `src/components/Sidebar.tsx` also exports `ProfileLinks` (CV/email/GitHub/

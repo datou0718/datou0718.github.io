@@ -21,7 +21,7 @@ export const ResearchInterests: React.FC = () => (
 
 export const Bio: React.FC = () => (
     <section className="fade-in">
-        <div className="markdown-body" style={{ fontSize: '1.1rem' }}>
+        <div className="markdown-body bio-text" style={{ fontSize: '1.1rem' }}>
             <ReactMarkdown remarkPlugins={[remarkBreaks]}>
                 {content.bio}
             </ReactMarkdown>
@@ -294,7 +294,9 @@ export const Service: React.FC = () => (
 
 export const VisitorMap: React.FC = () => {
     const [mapKey, setMapKey] = React.useState(0);
-    const [currentTheme, setCurrentTheme] = React.useState(document.documentElement.getAttribute('data-theme') || 'light');
+    const [currentTheme, setCurrentTheme] = React.useState(() =>
+        typeof document === 'undefined' ? 'light' : document.documentElement.getAttribute('data-theme') || 'light'
+    );
 
     React.useEffect(() => {
         let timeoutId: any;

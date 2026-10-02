@@ -12,7 +12,7 @@ interface NavRowProps {
  *  sidebar and content columns (see .page-nav-row in index.css). */
 const NavRow: React.FC<NavRowProps> = ({ theme, toggleTheme }) => {
   const location = useLocation();
-  const path = location.pathname;
+  const path = location.pathname.replace(/\/+$/, '') || '/';
 
   const isAboutActive = path === '/';
   const isExperienceActive = path === '/experience';
@@ -32,13 +32,13 @@ const NavRow: React.FC<NavRowProps> = ({ theme, toggleTheme }) => {
         <Link to="/" className={`page-nav-link ${isAboutActive ? 'active' : ''}`}>
           About
         </Link>
-        <Link to="/experience" className={`page-nav-link ${isExperienceActive ? 'active' : ''}`}>
+        <Link to="/experience/" className={`page-nav-link ${isExperienceActive ? 'active' : ''}`}>
           Experience
         </Link>
-        <Link to="/publications" className={`page-nav-link ${isPublicationsActive ? 'active' : ''}`}>
+        <Link to="/publications/" className={`page-nav-link ${isPublicationsActive ? 'active' : ''}`}>
           Publications
         </Link>
-        <Link to="/posts" className={`page-nav-link ${isPostsActive ? 'active' : ''}`}>
+        <Link to="/posts/" className={`page-nav-link ${isPostsActive ? 'active' : ''}`}>
           Posts
         </Link>
         <button
