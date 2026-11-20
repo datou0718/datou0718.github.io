@@ -3,26 +3,33 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": { "node": ">=24" },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "npm run lint && npm run build"
+    "travel:resolve": "node scripts/travel.ts",
+    "test:travel": "node --test scripts/travel*.test.ts",
+    "check": "npm run lint && npm run test:travel && npm run build"
   },
   "dependencies": {
+    "d3-geo": "^3.1.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1",
     "remark-breaks": "^4.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

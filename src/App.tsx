@@ -12,6 +12,7 @@ import {
 } from './components/Sections';
 import Publications from './components/Publications';
 import VisitorMap from './components/VisitorMap';
+import Travel from './components/Travel';
 import type { Theme } from './types/theme';
 
 import ExperiencePage from './pages/ExperiencePage';
@@ -20,6 +21,7 @@ import PostsList from './pages/PostsList';
 import PostView from './pages/PostView';
 import Seo from './components/Seo';
 import { content } from './content';
+import { mapThemes } from './mapTheme';
 
 const Home: React.FC = () => (
   <main className="compact-sections">
@@ -28,11 +30,13 @@ const Home: React.FC = () => (
     <ResearchInterests />
     <Publications title="Selected Publications" selectedOnly={true} />
     <Reviewer />
+    <Travel />
   </main>
 );
 
 const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<Theme>('light');
+  const mapColors = mapThemes[theme];
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -43,7 +47,12 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="outer-padding">
+    <div className="outer-padding" style={{
+      '--map-land': mapColors.land,
+      '--map-background': mapColors.background,
+      '--map-text': mapColors.text,
+      '--map-marker': mapColors.marker,
+    } as React.CSSProperties}>
       <Seo />
       {/* Mobile Sticky Header */}
       <MobileProfile theme={theme} toggleTheme={toggleTheme} />

@@ -9,6 +9,7 @@ Use `npm run dev` for a live preview while editing.
 | Name, title, email, social links, research interests, education, experience, awards, teaching, reviewer entries, site URL | [profile.json](profile.json) |
 | Short biography and its research question | [bio.md](bio.md) |
 | Recent news | [news.json](news.json) |
+| Travel map cities and visit order | [travel.json](travel.json) |
 | Publications, selected papers, research questions, figure paths | [publications.json](publications.json) |
 | Post titles, dates, descriptions, and URLs | [posts.json](posts.json) |
 | Post text | [posts/](posts/) |
@@ -103,6 +104,65 @@ preserved.
 
 Headings generate the table of contents. New posts are included in the static
 build and sitemap automatically.
+
+## Travel map
+
+Edit `travel.json` to update the Travel section at the bottom of the homepage,
+after Reviewer. **Put the newest visit at the top.** Each visit is one location
+string: put the city name first, followed by any lookup hint after a comma:
+
+```json
+[
+  "Durham, North Carolina",
+  "Taipei, Taiwan",
+  "Tokyo, Japan",
+  "Hong Kong"
+]
+```
+
+The map displays **only the city name before the first comma**:
+`"Durham, North Carolina"` shows **Durham**, and `"Taipei, Taiwan"` shows
+**Taipei**. The full string is used for coordinate lookup and cache keys.
+There are no separate country or region fields, and provider wording is not
+added to the displayed name. `"Frankfurt, Germany"` uses the previously
+verified Frankfurt coordinates and shows **Frankfurt**.
+
+The array order controls the route; the map initially selects the latest
+visit and its counter uses chronological visit numbers.
+
+Coordinates resolve automatically during `npm run build` / `npm run check`
+and when you open or edit the site with `npm run dev`. New location labels
+need an internet connection once. Verified coordinates are saved in
+`src/generated/travel-geocodes.json`; commit cache changes with new visits
+so future builds can reuse them offline. The existing itinerary's coordinates
+have been retained. `npm run travel:resolve` resolves missing labels without
+building the website.
+
+If a new label matches multiple places, lookup stops with the available
+matches. Use a more specific location string, such as
+`"Springfield, Massachusetts"`; no extra fields are needed. The resolver
+never rewrites your labels or adds administrative wording to the map.
+
+Repeat an entry to show a return visit. Use the previous/next arrows below
+the map to step through every visit; the counter shows the selected visit
+number and total. Previous moves to an earlier visit, next to a later one.
+The arrows stop at the first and last visit. Visits at the same coordinates
+share a marker; select a shared marker to cycle through its visits. Map points
+are unnumbered. The current city is filled, the next destination is outlined,
+and their connecting leg is highlighted. Other points and routes are subdued.
+At the final visit, only the current city is highlighted.
+Lines connect consecutive cities along great-circle arcs, including across
+the Pacific. They indicate visit order, not exact flight or road itineraries.
+Zoom with the buttons, then drag the map to pan; keyboard users can focus the
+map and use arrow keys, or press Home to reset. An empty array (`[]`) shows an
+empty world map, and a single entry shows just its marker.
+
+The world outline and resolved coordinates are bundled with the website.
+Visitors do not make geocoding requests, need API keys, or share their location.
+City coordinates are from [GeoNames](https://www.geonames.org/) via
+[Open-Meteo](https://open-meteo.com/en/docs/geocoding-api), under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The coordinate values
+are stored unchanged; the map projects them for display.
 
 ## Assets and logos
 

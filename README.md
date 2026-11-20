@@ -10,10 +10,12 @@ Start with its editing guide; application code lives separately in `src/`.
 
 ## Development
 
+Use Node.js 24 or later.
+
 ```sh
 npm ci
 npm run dev      # http://localhost:8080; override with PORT
-npm run check    # lint, type checking, and production build
+npm run check    # lint, travel tests, type checking, and production build
 npm run preview # preview the generated site
 ```
 

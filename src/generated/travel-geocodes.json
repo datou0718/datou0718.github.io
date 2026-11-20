@@ -1,0 +1,100 @@
+{
+  "version": 2,
+  "locations": {
+    "busan, south korea": {
+      "id": 1838524,
+      "latitude": 35.10168,
+      "longitude": 129.03004
+    },
+    "colmar, france": {
+      "id": 3024297,
+      "latitude": 48.08078,
+      "longitude": 7.35584
+    },
+    "durham, north carolina": {
+      "id": 4464368,
+      "latitude": 35.99403,
+      "longitude": -78.89862
+    },
+    "frankfurt, germany": {
+      "id": 2925533,
+      "latitude": 50.11552,
+      "longitude": 8.68417
+    },
+    "heidelberg, germany": {
+      "id": 2907911,
+      "latitude": 49.40768,
+      "longitude": 8.69079
+    },
+    "hong kong": {
+      "id": 1819729,
+      "latitude": 22.27832,
+      "longitude": 114.17469
+    },
+    "karlsruhe, germany": {
+      "id": 2892794,
+      "latitude": 49.00937,
+      "longitude": 8.40444
+    },
+    "kyoto, japan": {
+      "id": 1857910,
+      "latitude": 35.02107,
+      "longitude": 135.75385
+    },
+    "london, united kingdom": {
+      "id": 2643743,
+      "latitude": 51.50853,
+      "longitude": -0.12574
+    },
+    "luzern, switzerland": {
+      "id": 2659811,
+      "latitude": 47.05048,
+      "longitude": 8.30635
+    },
+    "munich, germany": {
+      "id": 2867714,
+      "latitude": 48.13743,
+      "longitude": 11.57549
+    },
+    "nara, japan": {
+      "id": 1855612,
+      "latitude": 34.68505,
+      "longitude": 135.80486
+    },
+    "nuremberg, germany": {
+      "id": 2861650,
+      "latitude": 49.45421,
+      "longitude": 11.07752
+    },
+    "osaka, japan": {
+      "id": 1853909,
+      "latitude": 34.69379,
+      "longitude": 135.50107
+    },
+    "seoul, south korea": {
+      "id": 1835848,
+      "latitude": 37.566,
+      "longitude": 126.9784
+    },
+    "strasbourg, france": {
+      "id": 2973783,
+      "latitude": 48.58392,
+      "longitude": 7.74553
+    },
+    "taipei, taiwan": {
+      "id": 1668341,
+      "latitude": 25.05306,
+      "longitude": 121.52639
+    },
+    "tokyo, japan": {
+      "id": 1850147,
+      "latitude": 35.6895,
+      "longitude": 139.69171
+    },
+    "zurich, switzerland": {
+      "id": 2657896,
+      "latitude": 47.36667,
+      "longitude": 8.55
+    }
+  }
+}

@@ -3,6 +3,12 @@ export interface NewsItem {
   content: string;
 }
 
+export interface TravelStop {
+  label: string;
+  latitude: number;
+  longitude: number;
+}
+
 export interface EducationItem {
   degree: string;
   institution: string;

@@ -6,7 +6,7 @@ React + TypeScript + Vite academic website, statically rendered for GitHub Pages
 
 - `npm ci` installs the locked dependencies.
 - `npm run dev` starts Vite on port 8080 (override with `PORT`).
-- `npm run check` runs lint, type checking, and the production build.
+- `npm run check` runs lint, travel resolver tests, type checking, and the production build. Use Node.js 24 or later.
 - `npm run preview` serves the built site.
 - If Node is unavailable on PATH, use `conda run --no-capture-output -n website npm …`.
 
@@ -33,6 +33,7 @@ React + TypeScript + Vite academic website, statically rendered for GitHub Pages
 - Research Interests and the table of contents are hidden on mobile; Reviewer remains visible.
 - Selected publications use one card per row, with a figure on the left and text on the right. At 768px and below, figures stack above the text. Allow full text and expanded abstracts to grow naturally. Figures are non-interactive; authors are visible. Titles, author lists, and expanded details/abstracts are justified; research questions stay left-aligned. The full publication list remains separate.
 - Reviewer and Research Interests share `TagList`. Reviewer data is `content.reviewer`.
+- The Travel map is the last homepage section, after Reviewer. Edit `content/travel.json` as a newest-first array of location strings (for example, `"Durham, North Carolina"` and `"Taipei, Taiwan"`). Use the full string for geocoding/cache keys, but display only the authored city name before the first comma, without separate city/country/region fields or appended provider wording; the route and visit counter are chronological and the latest visit is initially selected. Use compact previous/next controls with a visit counter instead of a city list. Map points are unnumbered; emphasize the current city, its outgoing leg, and the next destination, with other routes and points subdued. Measure and position the two city labels together so they stay separated and inside the map during selection, zoom, pan, resizing, and font loading. `scripts/travel.ts` resolves new cities during Vite builds/dev updates and caches coordinates in `src/generated/travel-geocodes.json`; keep lookups out of visitors' browsers. Both maps share `src/mapTheme.ts`; preserve the travel map’s original curved Equal Earth outline and subtle latitude/longitude grid. Keep explanatory copy and attribution links out of the travel UI; retain source credits in the repository documentation. Preserve repeat visits, antimeridian wrapping, and keyboard controls.
 - Keep browser APIs in effects so static rendering and initial hydration agree. Preserve legacy hash links, SEO metadata, sitemap, and verification files.
 
 ## Validation

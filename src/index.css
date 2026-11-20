@@ -1827,3 +1827,226 @@ section:last-child,
     font-size: 0.9rem !important;
   }
 }
+
+/* Travel map: bundled world geometry and an owner-edited ordered itinerary. */
+.travel-section {
+  text-align: left;
+}
+
+.travel-figure {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.travel-map-canvas {
+  position: relative;
+  aspect-ratio: 1000 / 520;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--map-land) 3%, var(--map-background));
+  touch-action: pan-y;
+  isolation: isolate;
+}
+
+.travel-map-canvas.is-zoomed {
+  cursor: grab;
+  touch-action: none;
+}
+
+.travel-map-canvas.is-zoomed:active {
+  cursor: grabbing;
+}
+
+.travel-map-canvas svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.travel-ocean {
+  fill: var(--map-background);
+}
+
+.travel-graticule {
+  fill: none;
+  stroke: color-mix(in srgb, var(--map-land) 12%, var(--map-background));
+  stroke-width: 0.6;
+}
+
+.travel-land {
+  fill: var(--map-land);
+  stroke: var(--map-land);
+  stroke-width: 0.65;
+}
+
+.travel-route {
+  fill: none;
+  stroke: var(--map-marker);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.18;
+}
+
+.travel-route-halo {
+  stroke: var(--map-background);
+  stroke-width: 5;
+  opacity: 1;
+}
+
+.travel-route-active {
+  stroke-width: 2.5;
+  opacity: 1;
+}
+
+.travel-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--map-text);
+  font-family: var(--font-main);
+}
+
+.travel-marker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--map-marker);
+  border: 1px solid var(--map-background);
+  opacity: 0.4;
+}
+
+.travel-marker.is-next {
+  z-index: 1;
+}
+
+.travel-marker.is-selected {
+  z-index: 2;
+}
+
+.travel-marker.is-selected .travel-marker-dot,
+.travel-marker.is-next .travel-marker-dot {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--map-marker);
+  box-shadow: 0 0 0 2px var(--map-background);
+  opacity: 1;
+}
+
+.travel-marker.is-next .travel-marker-dot {
+  background: var(--map-background);
+}
+
+.travel-marker.is-selected .travel-marker-dot {
+  background: var(--map-marker);
+}
+
+.travel-map-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.travel-marker-label {
+  position: absolute;
+  visibility: hidden;
+  width: max-content;
+  max-width: min(240px, calc(100% - 16px));
+  padding: 3px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--glass-border);
+  background: var(--map-background);
+  color: var(--map-text);
+  box-shadow: var(--shadow);
+  font-family: var(--font-main);
+  font-size: 12px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.travel-map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.travel-map-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.travel-map-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.travel-map-controls button {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+  background: var(--nav-solid-bg);
+  color: var(--primary);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.travel-map-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.travel-visit-controls svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.travel-visit-count {
+  min-width: 4.5ch;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.travel-map button:hover:not(:disabled) {
+  color: var(--primary-hover);
+}
+
+.travel-map button:focus-visible,
+.travel-map-canvas:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
