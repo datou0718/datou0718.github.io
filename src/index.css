@@ -12,17 +12,7 @@
   /* Gold */
   --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-border: rgba(0, 33, 71, 0.1);
-  /* Opaque approximation of --glass-bg composited over --bg-color (i.e. what
-     a glass card actually looks like once painted) — for the sticky nav,
-     which can't use backdrop-filter/true translucency (see .page-glass
-     comment) but still needs to visually match the cards around it.
-     Precomputed to a plain hex value (= color-mix(in srgb, #ffffff 75%,
-     #fcfcfc 25%)) rather than left as a live color-mix() — color-mix()
-     recomputing on a position:sticky element's own compositing layer as it
-     engages/disengages while scrolling caused a real, visible color-flash
-     in-browser (didn't show up in computed-style checks, only in actual
-     scrolling — a paint-time artifact, not a logic bug). If --glass-bg or
-     --bg-color ever change, recompute and update this value by hand. */
+  /* Precomputed opaque glass color for sticky bars. Recompute if glass/background colors change; live color-mix can flicker while scrolling. */
   --nav-solid-bg: #fefefe;
   --shadow: 0 4px 6px -1px rgb(0 33 71 / 0.1), 0 2px 4px -2px rgb(0 33 71 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 33 71 / 0.1), 0 4px 6px -4px rgb(0 33 71 / 0.1);
@@ -30,33 +20,27 @@
   /* Typography */
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', sans-serif;
+  --font-research-question: Georgia, 'Times New Roman', serif;
 
   /* Spacing */
-  --section-padding: 5rem 1rem;
-  /* min(), not a flat px value — scales fluidly with the viewport (92vw) on
-     small-to-medium desktop widths instead of jumping straight to a fixed
-     size the moment the sidebar breakpoint hits, but stops growing past
-     1200px so it doesn't read as too wide on very large monitors. */
-  --container-width: min(1200px, 92vw);
+  --container-width: min(1600px, 96vw);
   /* Every glass card on the page shares this one padding value — the only
      exception is .page-glass (the outer page wrapper), which keeps its own
      larger, independent 2rem. */
   --glass-padding: 1rem;
 
-  /* Sidebar profile-link row. These values are intentionally independent of
-     the CEI wordmark and navigation controls. --profile-icon-count must
-     match the number of icons ProfileLinks renders (Sidebar.tsx). */
+  /* Shared width for the desktop wordmark, avatar, profile links, and map.
+     --profile-icon-count must match ProfileLinks (Sidebar.tsx). */
   --profile-icon-size: 2.2rem;
   --profile-icon-gap: 0.5rem;
   --profile-icon-count: 6;
   --sidebar-profile-width: calc(var(--profile-icon-count) * var(--profile-icon-size) + (var(--profile-icon-count) - 1) * var(--profile-icon-gap));
 
-  /* The CEI artwork, title line, and outer nav controls share this height.
-     Labels/icons inside the controls are intentionally smaller. */
+  /* The title line and outer nav controls share this height; the wordmark
+     is centered vertically within the same row. */
   --nav-title-size: 1.875rem;
   --nav-label-size: 1.15rem;
   --nav-control-height: 2.2rem;
-  --nav-logo-width: 19.74rem;
   --desktop-nav-sticky-top: 1rem;
   --desktop-nav-height: calc(var(--nav-control-height) + 2rem);
 
@@ -70,13 +54,7 @@
   --primary-hover: #f4d03f;
   --accent: #ffffff;
   /* White */
-  /* Matches what --glass-bg composited over this color actually renders as
-     (see --nav-solid-bg below) — on mobile .page-glass goes fully transparent
-     (edge-to-edge look), so this raw body color shows directly in the gaps
-     around/between cards. It used to be a brighter, more saturated navy than
-     the glass cards sitting on top of it, which read as two different colors
-     on the same page — this makes the whole page one consistent dark navy,
-     as if the entire page were itself behind glass. */
+  /* Match the glass-composited page color so mobile cards and background share one navy. */
   --bg-color: #001938;
   --text-primary: #ffffff;
   --text-secondary: #b0c4de;
@@ -133,6 +111,31 @@ body {
   padding: 0;
 }
 
+.site-footer {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.site-footer p {
+  margin-bottom: 0.5rem;
+}
+
+.bio-text {
+  font-size: 1.1rem;
+}
+
+.glass-card.visitor-map {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
+
+#map-container {
+  width: 100%;
+}
+
 /* Glassmorphism Card Base */
 .glass-card {
   background: var(--glass-bg);
@@ -141,7 +144,6 @@ body {
   box-shadow: var(--shadow);
   padding: var(--glass-padding);
 }
-
 
 /* Only the outermost page wrapper gets blur — nested backdrop-filter
    creates stacking contexts that break position:sticky z-ordering */
@@ -260,16 +262,24 @@ a:hover {
   color: var(--text-secondary);
 }
 
+/* Shared tag layout for Research Interests and Reviewer. */
+.tag-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-list-item {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1199.98px) {
-  /* 100%, not a narrower 90% — this whole range is "mobile mode" (avatar
-     header on top, edge-to-edge nav bar via negative margins relative to
-     .outer-padding). A leftover 90% here from an earlier, pre-edge-to-edge
-     design narrowed and centered .container just for the 768–1200px slice,
-     which every full-bleed child inside it (.page-nav-row, its border-bottom
-     separator) inherited as an extra ~58px inset it never asked for — while
-     .mobile-profile (a sibling of .container, not a descendant) correctly
-     bled to the true edge, producing a visible mismatch between the two. */
+  .research-interests {
+    display: none;
+  }
   :root {
     --container-width: 100%;
   }
@@ -290,28 +300,12 @@ a:hover {
 @media (max-width: 768px) {
   :root {
     --container-width: 100%;
-    --section-padding: 3rem 1rem;
     --glass-padding: 0.75rem;
-    /* Smaller so the icon can stay inline next to the text (like pbb.sh) at
-       mobile widths instead of needing to stack above it, and so the text
-       column keeps as much width as possible to avoid awkward wrapping of
-       institution names. */
     --exp-icon-size: 2.5rem;
   }
-
-  /* No horizontal padding here: .outer-padding already provides one consistent
-     edge margin for everything (mobile header, nav bar, content). Adding more
-     here made the nav bar/content sit further from the edge than the mobile
-     header, which is a direct child of .outer-padding and skips .container. */
   .container {
     padding: 0;
   }
-
-  /* Justify still reads fine for paragraph copy on mobile (more words per
-     line than a heading, so the gaps aren't as visible) — body text keeps
-     the base justify. Headings wrap to only a few large words per line
-     though, which produced ugly uneven gaps (worst with CJK text), so
-     those specifically stay left-aligned below. */
   h1,
   h2,
   h3 {
@@ -331,50 +325,12 @@ a:hover {
     font-size: 1.1rem;
   }
 
-  /* Specific header centering overrides */
-  .mobile-stack h1,
-  .mobile-stack p.text-secondary {
-    text-align: center !important;
+  /* Smaller tags fit more items per row in the mobile column. */
+  .tag-list-item {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.9rem;
   }
 
-  .mobile-stack h1 span {
-    display: inline-block;
-  }
-
-  @media (max-width: 400px) {
-    .mobile-stack h1 span {
-      display: block !important;
-    }
-  }
-
-
-
-  /* Smaller font/padding (overriding the inline style) so more tags fit per
-     row in the narrower mobile column instead of stacking one-per-line. */
-  section h2+ul li {
-    padding: 0.35rem 0.7rem !important;
-    font-size: 0.9rem !important;
-  }
-
-  /* Helper to stack flex items on mobile */
-  .mobile-stack {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    text-align: left !important;
-    gap: 0.5rem !important;
-  }
-
-  /* Specific fix for News/Publications dates/labels */
-  .mobile-stack>* {
-    width: 100% !important;
-    min-width: unset !important;
-    text-align: left !important;
-  }
-
-  /* Center headshot container when stacked */
-  .mobile-stack>div:first-child>div {
-    margin: 0 auto;
-  }
 }
 
 @media (max-width: 480px) {
@@ -489,7 +445,7 @@ a:hover {
 /* The bold, italic research question in the biography. */
 .bio-text em strong,
 .bio-text strong em {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-research-question);
   font-weight: 700;
 }
 
@@ -605,33 +561,23 @@ a:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Visitor Map Polishes */
-#mapmyvisitors-widget>div>div:first-child {
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
+/* The widget sets inline typography; keep its labels compact in the sidebar. */
+.visitor-map .mapmyvisitors-visitors,
+.visitor-map .mapmyvisitors-date,
+.visitor-map .mapmyvisitors-bottom-text,
+.visitor-map #clstminf {
+  font-size: 0.75rem !important;
+  line-height: 1.4 !important;
+  font-family: var(--font-main) !important;
+}
+
+.visitor-map .mapmyvisitors-visitors {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
   margin: 0 !important;
-  padding-top: 2.25rem !important;
-  padding-bottom: 0.5rem !important;
-  font-family: var(--font-heading) !important;
+  padding: 0.65rem 0.5rem 0.35rem !important;
   color: var(--primary) !important;
-  text-transform: capitalize;
 }
-
-@media (max-width: 768px) {
-  #mapmyvisitors-widget>div>div:first-child {
-    padding-top: 1.5rem !important;
-  }
-}
-
-@media (max-width: 480px) {
-  #mapmyvisitors-widget>div>div:first-child {
-    padding-top: 1rem !important;
-  }
-}
-
-/* ==========================================================================
-   Fixed Sidebar, Columns Layout & Navigation Styles (inspired by pbb.sh)
-   ========================================================================== */
 
 .outer-padding {
   padding: 1rem;
@@ -701,11 +647,50 @@ a:hover {
   text-align: center;
 }
 
-.sidebar-inner > :not(.toc-area) {
+.sidebar-inner > * {
   flex-shrink: 0;
 }
 
-/* Avatar width follows the smaller profile-link row, not the CEI wordmark. */
+@media (min-width: 1200px) {
+  /* Let the profile and map scroll together in short desktop windows. */
+  .sidebar-with-map .sidebar-affix {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-with-map .sidebar-inner,
+  .sidebar-with-map .visitor-map {
+    flex-shrink: 0;
+  }
+
+  .sidebar-with-map .visitor-map {
+    width: min(100%, var(--sidebar-profile-width));
+    margin: 1.5rem auto 0;
+  }
+
+}
+
+@media (max-width: 1199.98px) {
+  /* Keep one map instance, below the main content when the profile is hidden. */
+  .sidebar-with-map {
+    display: block;
+    flex: 0 0 100%;
+    order: 1;
+    width: 100%;
+  }
+
+  .sidebar-with-map .sidebar-affix {
+    position: static;
+    max-height: none;
+  }
+
+  .sidebar-with-map .sidebar-inner {
+    display: none;
+  }
+}
+
+/* Keep the avatar aligned with the desktop wordmark and profile-link row. */
 .profile-avatar {
   width: var(--sidebar-profile-width);
   aspect-ratio: 1;
@@ -789,14 +774,6 @@ a:hover {
   margin: 0;
 }
 
-.sidebar-affiliation {
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-  text-align: center;
-  margin: 0;
-}
-
 .social-row {
   display: flex;
   justify-content: center;
@@ -842,12 +819,19 @@ a:hover {
   width: min(100%, var(--sidebar-profile-width));
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  /* Include the gap formerly supplied by .name-section. Clip this spacing
-     too when the profile leaves no room for the TOC. */
+  align-self: center;
+  /* Keep links reachable when the profile and map exceed the viewport. */
+  min-height: 10rem;
+  /* Include the gap above the TOC in its available scroll area. */
   padding-top: calc(1.5rem + 0.875rem);
   overflow: hidden;
   text-align: left;
+}
+
+@media (max-width: 1199.98px) {
+  .toc-area {
+    display: none;
+  }
 }
 
 .toc-area hr {
@@ -963,7 +947,7 @@ a:hover {
 }
 
 .nav-cei-wordmark {
-  width: var(--nav-logo-width);
+  width: var(--sidebar-profile-width);
   height: var(--nav-control-height);
   display: flex;
   align-items: center;
@@ -971,10 +955,6 @@ a:hover {
 }
 
 @media (min-width: 1200px) {
-  /* The sticky nav draws the desktop page's rounded top edge. Suppress the
-     original scrolling top border so a second straight line can never pass
-     above that curve during the first pixels of scrolling. The transparent
-     border keeps the page geometry unchanged. */
   .glass-card.page-glass {
     border-top-color: transparent;
   }
@@ -1032,14 +1012,7 @@ a:hover {
   .page-nav-row {
     display: flex;
     justify-content: space-between;
-    /* Set from MobileProfile's actual measured height (see its
-       useLayoutEffect) so this sits flush underneath it — a hardcoded guess
-       here previously undershot the real height and caused the nav row to
-       overlap/jump under the header once it became stuck while scrolling. */
     top: var(--mobile-profile-height, 76px);
-    /* Bleeds out to the true viewport edge like .mobile-profile above it —
-       padding is bumped to 1rem (from 0.5rem) to match .outer-padding, so
-       the tabs still line up with the content below, which keeps that inset. */
     width: calc(100% + 2rem);
     margin-left: -1rem;
     padding: 0.75rem 1rem;
@@ -1131,12 +1104,6 @@ a:hover {
 }
 
 @media (max-width: 1199.98px) {
-  /* The mobile header (MobileProfile) already has its own theme toggle next
-     to the name, so the nav row's copy would be redundant; the page title is
-     dropped here too, leaving just the four page tabs. !important keeps this
-     display:none robust against .theme-toggle-nav's own display:inline-flex
-     declared above (same-specificity, earlier in the file — see CLAUDE.md's
-     cascade-order note). */
   .page-nav-title {
     display: none;
   }
@@ -1149,14 +1116,6 @@ a:hover {
     font-size: 0.9rem;
     padding: 0.35rem 0.5rem;
   }
-
-  /* min-width:0 lets this flex item shrink below its content's natural width;
-     without it, a long active title (e.g. "Experience") can push later tabs
-     completely past the edge of the viewport with no way to reach them.
-     overflow-x:auto means the worst case is a scrollable strip, never tabs
-     that vanish outright — mirrors pbb.sh's own .page-nav-tabs.
-     flex:1 + space-evenly makes the four tabs fill the row and space
-     themselves out evenly instead of clumping to the left. */
   .page-nav-tabs {
     flex: 1;
     min-width: 0;
@@ -1211,19 +1170,9 @@ a:hover {
 
 @media (max-width: 1199.98px) {
   .mobile-profile {
-    /* Bleeds out to the true viewport edge on all three outer sides, past
-       .outer-padding's inset — padding above already matches .outer-padding's
-       1rem, so the avatar/name still line up with the content below, which
-       keeps that inset. Top needs the same treatment as left/right: without
-       it, this sits 1rem below the real viewport top until you scroll past
-       that 1rem and it becomes sticky-stuck, leaving a gap that shows the
-       page background instead of the header's own background at rest. */
     width: calc(100% + 2rem);
     margin: -1rem -1rem 0;
   }
-}
-
-@media (max-width: 1199.98px) {
   .mobile-profile {
     display: flex;
   }
@@ -1322,25 +1271,11 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
-/* Unified section card for Education / Experience / Awards / Teaching.
-   Icon + text are both normal-flow children inside the card — nothing
-   escapes the card's box via negative offsets, so the sticky nav bar can
-   never be pierced by a logo (it previously could: see git history). */
-.section-card {
-  position: relative;
-}
-
 .exp-row {
   position: relative;
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  /* Tied to the same var the card uses for its own padding (not a separately
-     hardcoded 1rem) so the first row's top inset and the last row's bottom
-     inset always match the card's edge padding exactly — otherwise they only
-     happened to match at the desktop breakpoint where both were 1rem, and
-     drifted apart (1rem vs 0.75rem) once --glass-padding stepped down for
-     mobile. */
   padding: var(--glass-padding) 0;
 }
 
@@ -1352,7 +1287,7 @@ a:hover {
   padding-bottom: 0;
 }
 
-.exp-row-divider {
+.exp-row:not(:last-child) {
   border-bottom: 1px solid var(--glass-border);
 }
 
@@ -1371,10 +1306,6 @@ a:hover {
 }
 
 .exp-body {
-  /* Single source of truth for the gap between every text line in a row
-     (title, date, affiliation, note) — also read by the mobile .timeline-row
-     override below so the two gaps can't drift out of sync again the way
-     they did as separate hardcoded values (0.3rem here vs 0.15rem there). */
   --exp-line-gap: 0.3rem;
   flex: 1;
   min-width: 0;
@@ -1428,39 +1359,39 @@ a:hover {
   border-radius: 3px;
 }
 
-/* News list items — symmetric padding, flex row */
+/* News list items — aligned date column on desktop, stacked on mobile. */
 .news-item {
   display: flex;
   gap: 1rem;
-  /* Centered rather than top-aligned so the date sits level with the middle
-     of the content next to it once that content wraps to 2+ lines. */
-  align-items: center;
+  align-items: baseline;
   /* Tied to the card's own padding var, same reasoning as .exp-row above —
      keeps the first/last item's edge inset matching the card's padding at
      every breakpoint instead of just coincidentally at desktop. */
   padding: var(--glass-padding) 0;
 }
 
-/* Divider between items, not after the last one — was a per-item computed
-   inline style (index < length - 1) in News/Publications/Service; a plain
-   :not(:last-child) does the same thing declaratively. */
+/* Dividers separate news and publication entries without a trailing border. */
 .news-item:not(:last-child),
-.pub-entry:not(:last-child),
-.service-entry:not(:last-child) {
+.pub-entry:not(:last-child) {
   border-bottom: 1px solid var(--glass-border);
 }
 
 .news-date {
+  flex: 0 0 7rem;
   font-weight: 700;
   color: var(--primary);
-  min-width: 100px;
   font-size: 0.95rem;
-  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: left;
 }
 
 .news-content {
   flex: 1;
+  min-width: 0;
   font-size: 0.95rem;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 
 /* Institution logo rendering + shared timeline text styles (used by .exp-body above) */
@@ -1481,22 +1412,6 @@ a:hover {
   font-size: 0.9rem;
   color: #ffffff;
   text-transform: uppercase;
-}
-
-.bg-duke {
-  background-color: #003087;
-}
-
-.bg-ntu {
-  background-color: #970302;
-}
-
-.bg-notredame {
-  background-color: #0c2340;
-}
-
-.bg-sinica {
-  background-color: #1f4e79;
 }
 
 .timeline-note {
@@ -1526,14 +1441,6 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-  /* Title+date and affiliation+location were side-by-side (space-between),
-     which looked broken as soon as the left side wrapped to 2+ lines (the
-     short right-side text would end up stranded next to the wrong line).
-     Stack them instead so each piece gets the row's full width. Placed here,
-     after the base .timeline-row/.timeline-meta-text rules, since an earlier
-     copy of this override sitting before those base rules in the file was
-     silently losing the cascade (same-specificity, later-wins bug — see
-     CLAUDE.md's CSS cascade order note) and never actually applied. */
   .timeline-row {
     flex-direction: column;
     align-items: flex-start;
@@ -1562,6 +1469,19 @@ a:hover {
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+  }
+
+  .news-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .news-date {
+    flex: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
   }
 }
 
@@ -1620,10 +1540,8 @@ a:hover {
   border-color: #d4af37 !important;
 }
 
-/* Publications and Service list items — equal vertical padding and margin alignment */
-/* Same var-tied padding as .exp-row/.news-item above, for the same reason. */
-.pub-entry,
-.service-entry {
+/* Publication rows share the card padding used by experience and news rows. */
+.pub-entry {
   padding: var(--glass-padding) 0;
 }
 
@@ -1643,29 +1561,50 @@ a:hover {
   letter-spacing: 0.04em;
   margin-bottom: 0.25rem;
 }
-
-/* Overrides the mobile h1/h2/h3 { text-align: left !important } rule
-   (justify reads badly on short, few-word section headings, but paper
-   titles are long enough — several words per line, like body copy — that
-   justify looks fine and was requested explicitly for this field). */
 .pub-entry h3.pub-title {
+  font-family: var(--font-main);
+  line-height: 1.2;
   color: var(--primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
   text-align: justify !important;
+}
+
+/* Keep each paper's metadata close together; row padding separates papers. */
+.pub-authors,
+.pub-venue {
+  line-height: 1.4;
 }
 
 .pub-authors {
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  text-align: justify;
 }
 
 .pub-venue {
   font-style: italic;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.pub-research-question {
+  font-family: var(--font-research-question);
+  color: var(--primary);
+  background: rgba(0, 33, 71, 0.05);
+  border-inline-start: 3px solid var(--primary);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.5rem var(--glass-padding);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+[data-theme='dark'] .pub-research-question {
+  background: rgba(212, 175, 55, 0.1);
 }
 
 .pub-abstract {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   cursor: pointer;
 }
 
@@ -1685,14 +1624,132 @@ a:hover {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
+  margin-top: 0;
+}
+
+/* Selected papers use compact illustrated cards; the full list keeps its rows. */
+.selected-publications-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.selected-publication-card {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: start;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  text-align: left;
+}
+
+.selected-publication-figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  margin: var(--glass-padding) 0 var(--glass-padding) var(--glass-padding);
+  padding: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+}
+
+.selected-publication-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.selected-publication-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: var(--glass-padding);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.selected-publication-content:only-child {
+  grid-column: 1 / -1;
+}
+
+.selected-publication-content > .pub-status,
+.selected-publication-content > .pub-title,
+.selected-publication-content > .pub-authors,
+.selected-publication-content > .pub-research-question {
+  margin: 0;
+}
+
+.selected-publication-card .pub-status {
+  font-size: 0.8125rem;
+}
+
+.selected-publication-card .pub-title {
+  font-family: var(--font-main);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--primary);
+  text-align: justify !important;
+}
+
+.selected-publication-card .pub-research-question {
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.65rem;
+}
+
+.selected-publication-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.selected-publication-details-content {
+  margin-top: 0.5rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--glass-border);
+  text-align: justify;
+}
+
+.selected-publication-card .pub-authors,
+.selected-publication-card .pub-venue {
+  font-size: inherit;
+}
+
+.selected-publication-abstract {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.selected-publication-card .pub-links {
+  gap: 0.5rem;
+}
+
+.selected-publication-card .pub-btn {
+  font-size: 0.875rem;
+  padding: 0.4rem 0.65rem !important;
+}
+
+.publications-more {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.publications-more-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
 }
 
 /* ─── Spacing Cleanup for Perfect Border Spacing ─── */
-
-/* Reset first/last child vertical padding inside card lists so the top/bottom spacing
-   to the card borders matches the left/right card padding (var(--glass-padding)) exactly.
-   (.exp-row's own first/last reset lives alongside its other rules above.) */
 .news-item:first-child {
   padding-top: 0;
 }
@@ -1701,13 +1758,11 @@ a:hover {
   padding-bottom: 0;
 }
 
-.pub-entry:first-child,
-.service-entry:first-child {
+.pub-entry:first-child {
   padding-top: 0;
 }
 
-.pub-entry:last-child,
-.service-entry:last-child {
+.pub-entry:last-child {
   padding-bottom: 0;
 }
 
@@ -1716,14 +1771,19 @@ section:last-child,
 .compact-sections section:last-child {
   margin-bottom: 0 !important;
 }
-
-/* ─── Slightly smaller body/content text on mobile ───
-   Headings already step down at these breakpoints (above); this covers the
-   remaining content copy (Bio/post paragraphs, Experience entries, News,
-   Publications) that still felt too large — deliberately excludes the
-   mobile header (MobileProfile) and the nav bar, which keep their own sizing. */
 @media (max-width: 768px) {
-  /* !important beats Bio's inline style={{fontSize:'1.1rem'}} (Sections.tsx) */
+  .selected-publication-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .selected-publication-figure {
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid var(--glass-border);
+    border-radius: 0;
+  }
+
+  /* Override the post body's inline font size on smaller screens. */
   .markdown-body {
     font-size: 1rem !important;
   }
@@ -1731,11 +1791,6 @@ section:last-child,
   .markdown-body p {
     font-size: 0.95rem;
   }
-
-  /* Unified size across title/date/affiliation/details on mobile — weight
-     and color still differ per field, but the size no longer does (a real
-     user-reported inconsistency: title read noticeably larger than the
-     other three fields). */
   .exp-body h3,
   .timeline-note,
   .timeline-meta-text,
@@ -1743,7 +1798,6 @@ section:last-child,
     font-size: 0.95rem !important;
   }
 
-  .news-date,
   .news-content {
     font-size: 0.9rem;
   }
@@ -1752,12 +1806,6 @@ section:last-child,
   .pub-venue {
     font-size: 0.95rem;
   }
-
-  /* Location reads fine alongside institution on the wide desktop layout,
-     but on mobile — where each field already gets its own full-width line
-     (see .timeline-row above) — it adds a line to every single entry across
-     Education/Experience/Awards/Teaching without adding much. Keep it for
-     desktop, hide it here. */
   .timeline-location {
     display: none;
   }

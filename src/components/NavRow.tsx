@@ -2,45 +2,36 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import CeiWordmark from './CeiWordmark';
 import { ThemeToggleIcon } from './ThemeToggleIcon';
+import type { ThemeControls } from '../types/theme';
 
-interface NavRowProps {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-}
+const navigation = [
+  { path: '/', label: 'About' },
+  { path: '/experience/', label: 'Experience' },
+  { path: '/publications/', label: 'Publications' },
+  { path: '/posts/', label: 'Posts' },
+];
 
 /** Sticky tab bar spanning the full glass card width, above both the
  *  sidebar and content columns (see .page-nav-row in index.css). */
-const NavRow: React.FC<NavRowProps> = ({ theme, toggleTheme }) => {
+const NavRow: React.FC<ThemeControls> = ({ theme, toggleTheme }) => {
   const location = useLocation();
   const path = location.pathname.replace(/\/+$/, '') || '/';
 
-  const isAboutActive = path === '/';
-  const isExperienceActive = path === '/experience';
-  const isPublicationsActive = path === '/publications';
-  const isPostsActive = path === '/posts' || path.startsWith('/posts/');
-
-  let title = 'About';
-  if (isExperienceActive) title = 'Experience';
-  else if (isPublicationsActive) title = 'Publications';
-  else if (isPostsActive) title = 'Posts';
+  const active = navigation.find(item =>
+    path === (item.path.replace(/\/$/, '') || '/') ||
+    (item.path === '/posts/' && path.startsWith(item.path))
+  );
 
   return (
     <div className="page-nav-row">
       <CeiWordmark className="nav-cei-wordmark" />
-      <h1 className="page-nav-title">{title}</h1>
+      <h1 className="page-nav-title">{active?.label ?? 'About'}</h1>
       <nav className="page-nav-tabs">
-        <Link to="/" className={`page-nav-link ${isAboutActive ? 'active' : ''}`}>
-          About
-        </Link>
-        <Link to="/experience/" className={`page-nav-link ${isExperienceActive ? 'active' : ''}`}>
-          Experience
-        </Link>
-        <Link to="/publications/" className={`page-nav-link ${isPublicationsActive ? 'active' : ''}`}>
-          Publications
-        </Link>
-        <Link to="/posts/" className={`page-nav-link ${isPostsActive ? 'active' : ''}`}>
-          Posts
-        </Link>
+        {navigation.map(item => (
+          <Link key={item.path} to={item.path} className={`page-nav-link ${active === item ? 'active' : ''}`}>
+            {item.label}
+          </Link>
+        ))}
         <button
           onClick={toggleTheme}
           className="page-nav-link theme-toggle-nav"

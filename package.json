@@ -1,5 +1,5 @@
 {
-  "name": "temp-vite",
+  "name": "yi-chun-liao-website",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,15 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check": "npm run lint && npm run build"
   },
   "dependencies": {
-    "puppeteer": "^24.37.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1",
-    "rehype-slug": "^6.0.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1"
   },

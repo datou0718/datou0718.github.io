@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from 'react';
-import { content } from '../data/content';
+import { content } from '../content';
 import { useLayout } from '../context/LayoutContext';
 
 /**
@@ -42,7 +42,7 @@ export const ProfileLinks: React.FC = () => (
   </div>
 );
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { sidebarContent } = useLayout();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -100,15 +100,15 @@ const Sidebar: React.FC = () => {
             <ProfileLinks />
           </div>
         </div>
-
-        {/* The TOC can shrink independently of the avatar and profile details. */}
-        {sidebarContent && (
-          <div className="toc-area">
-            <hr />
-            {sidebarContent}
-          </div>
-        )}
       </aside>
+      {children}
+      {/* Keep the map below the profile; let the TOC scroll independently. */}
+      {sidebarContent && (
+        <div className="toc-area">
+          <hr />
+          {sidebarContent}
+        </div>
+      )}
     </div>
   );
 };

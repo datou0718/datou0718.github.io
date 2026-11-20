@@ -1,7 +1,8 @@
 import React from 'react';
+import type { Theme } from '../types/theme';
 
 interface ThemeToggleIconProps {
-  theme: 'light' | 'dark';
+  theme: Theme;
   size?: number;
 }
 

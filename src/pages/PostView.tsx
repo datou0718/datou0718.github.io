@@ -4,10 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import { useLayout } from '../context/LayoutContext';
-import postsData from '../data/posts.json';
+import postsData from '../../content/posts.json';
 
 // Eagerly glob import all markdown posts at compile time to prevent runtime fetch failures.
-const postsContent = import.meta.glob('../posts/*.md', { query: '?raw', import: 'default', eager: true });
+const postsContent = import.meta.glob<string>('../../content/posts/*.md', { query: '?raw', import: 'default', eager: true });
 
 // Shared slugifier to ensure 100% agreement between Table of Contents links and rendered headings
 const slugify = (text: string) => {
@@ -16,7 +16,7 @@ const slugify = (text: string) => {
         // Replace spaces/tabs/newlines with hyphens
         .replace(/\s+/g, '-')
         // Remove non-word, non-CJK, non-hyphen chars (keep English letters, numbers, CJK, hyphens, underscores)
-        .replace(/[^\w\u4e00-\u9fa5\-\_]+/g, '')
+        .replace(/[^\w\u4e00-\u9fa5-]+/g, '')
         // Collapse multiple hyphens
         .replace(/-+/g, '-')
         // Trim leading and trailing hyphens
@@ -24,10 +24,10 @@ const slugify = (text: string) => {
 };
 
 // Helper to extract raw text content recursively from React nodes
-const getParagraphText = (node: any): string => {
-    if (typeof node === 'string') return node;
+const getParagraphText = (node: React.ReactNode): string => {
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
     if (Array.isArray(node)) return node.map(getParagraphText).join('');
-    if (node && node.props && node.props.children) return getParagraphText(node.props.children);
+    if (React.isValidElement<{ children?: React.ReactNode }>(node)) return getParagraphText(node.props.children);
     return '';
 };
 
@@ -48,7 +48,7 @@ const parseHeadings = (text: string) => {
     while ((match = headingRegex.exec(strippedText)) !== null) {
         const depth = match[1].length;
         // Clean up basic markdown formatting from heading text to display clean text in TOC
-        const headingText = match[2].replace(/[\*\_`#]/g, '').trim();
+        const headingText = match[2].replace(/[*_`#]/g, '').trim();
         const headingId = slugify(headingText);
         list.push({ id: headingId, text: headingText, depth });
     }
@@ -61,7 +61,7 @@ const PostView: React.FC = () => {
     // These files are already bundled; synchronous reads also make the full post
     // available to the static renderer instead of an unindexable loading screen.
     const meta = postsData.find(post => post.id === id);
-    const content = meta ? (postsContent[`../posts/${meta.file}`] as string | undefined) ?? '' : '';
+    const content = meta ? postsContent[`../../content/posts/${meta.file}`] ?? '' : '';
     const error = !meta ? 'Post not found' : !content ? 'Could not load markdown file from bundle' : null;
     const headings = useMemo(() => parseHeadings(content), [content]);
     const [activeId, setActiveId] = useState<string>('');
@@ -98,12 +98,7 @@ const PostView: React.FC = () => {
             if (el) observer.observe(el);
         });
 
-        return () => {
-            headings.forEach((h) => {
-                const el = document.getElementById(h.id);
-                if (el) observer.unobserve(el);
-            });
-        };
+        return () => observer.disconnect();
     }, [headings]);
 
     // Push Table of Contents to Sidebar
@@ -172,18 +167,20 @@ const PostView: React.FC = () => {
                             h4: makeHeadingRenderer('h4'),
                             h5: makeHeadingRenderer('h5'),
                             h6: makeHeadingRenderer('h6'),
-                            a: ({ node, href, children, ...props }) => {
+                            a: ({ href, children, title }) => {
                                 if (href && href.startsWith('#')) {
                                     return (
                                         <a
                                             href={href}
-                                            {...(props as any)}
+                                            title={title}
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 let targetId = href.substring(1);
                                                 try {
                                                     targetId = decodeURIComponent(targetId);
-                                                } catch (err) { }
+                                                } catch {
+                                                    // Keep the original ID when a fragment is malformed.
+                                                }
 
                                                 const element = document.getElementById(targetId);
                                                 if (element) {
@@ -195,7 +192,7 @@ const PostView: React.FC = () => {
                                         </a>
                                     );
                                 }
-                                return <a href={href} {...(props as any)}>{children}</a>;
+                                return <a href={href} title={title}>{children}</a>;
                             }
                         }}
                     >

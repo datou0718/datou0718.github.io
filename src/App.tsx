@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { LayoutProvider } from './context/LayoutContext';
+import { LayoutProvider } from './context/LayoutProvider';
 import Sidebar from './components/Sidebar';
 import MobileProfile from './components/MobileProfile';
 import NavRow from './components/NavRow';
@@ -8,15 +8,18 @@ import {
   Bio,
   News,
   ResearchInterests,
-  Publications,
-  VisitorMap
+  Reviewer,
 } from './components/Sections';
+import Publications from './components/Publications';
+import VisitorMap from './components/VisitorMap';
+import type { Theme } from './types/theme';
 
 import ExperiencePage from './pages/ExperiencePage';
 import PublicationsPage from './pages/PublicationsPage';
 import PostsList from './pages/PostsList';
 import PostView from './pages/PostView';
 import Seo from './components/Seo';
+import { content } from './content';
 
 const Home: React.FC = () => (
   <main className="compact-sections">
@@ -24,12 +27,12 @@ const Home: React.FC = () => (
     <News />
     <ResearchInterests />
     <Publications title="Selected Publications" selectedOnly={true} />
-    <VisitorMap />
+    <Reviewer />
   </main>
 );
 
 const AppContent: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -52,8 +55,10 @@ const AppContent: React.FC = () => {
 
           <div className="layout-grid">
             {/* Left Column (Sidebar) */}
-            <div className="sidebar-col">
-              <Sidebar />
+            <div className="sidebar-col sidebar-with-map">
+              <Sidebar>
+                <VisitorMap theme={theme} />
+              </Sidebar>
             </div>
 
             {/* Right Column (Content) */}
@@ -74,8 +79,8 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </div>
-        <footer style={{ textAlign: 'center', marginTop: '2rem' }} className="text-secondary">
-          <p>© Copyright {new Date().getFullYear()} Yi-Chun Liao. All rights reserved.</p>
+        <footer className="site-footer text-secondary">
+          <p>© Copyright {new Date().getFullYear()} {content.name.english}. All rights reserved.</p>
         </footer>
       </div>
     </div>

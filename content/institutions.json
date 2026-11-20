@@ -1,0 +1,26 @@
+{
+  "Duke University": {
+    "initials": "D",
+    "logo": "/logos/duke.svg",
+    "color": "#003087"
+  },
+  "National Taiwan University": {
+    "initials": "NTU",
+    "logo": "/logos/ntu.png",
+    "color": "#970302"
+  },
+  "University of Notre Dame": {
+    "initials": "ND",
+    "logo": "/logos/notredame.svg",
+    "color": "#0c2340"
+  },
+  "Academia Sinica": {
+    "initials": "AS",
+    "logo": "/logos/sinica.svg",
+    "color": "#1f4e79"
+  },
+  "Irving T. Ho Memorial Foundation": {
+    "initials": "ITH",
+    "logo": "/logos/irving-t-ho-foundation.png"
+  }
+}

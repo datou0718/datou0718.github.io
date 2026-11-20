@@ -1,57 +1,72 @@
-import React, { useState, useRef, useLayoutEffect } from 'react';
-import { content, type NewsItem, type Publication } from '../data/content';
-import newsData from '../data/news.json';
-import publicationsData from '../data/publications.json';
+import React, { useRef, useLayoutEffect } from 'react';
+import { content } from '../content';
+import type { AwardItem, EducationItem, ExperienceItem, Institution, NewsItem, TeachingItem } from '../types/content';
+import newsData from '../../content/news.json';
+import bio from '../../content/bio.md?raw';
+import institutions from '../../content/institutions.json';
+import TagList from './TagList';
 
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 
 export const ResearchInterests: React.FC = () => (
-    <section className="fade-in">
+    <section className="fade-in research-interests">
         <h2>Research Interests</h2>
-        <ul style={{ listStyleType: 'none', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {content.researchInterests.map((interest, index) => (
-                <li key={index} className="glass-card" style={{ padding: '0.5rem 1rem', fontWeight: 500 }}>
-                    {interest}
-                </li>
-            ))}
-        </ul>
+        <TagList items={content.researchInterests} />
     </section>
 );
 
 export const Bio: React.FC = () => (
     <section className="fade-in">
-        <div className="markdown-body bio-text" style={{ fontSize: '1.1rem' }}>
+        <div className="markdown-body bio-text">
             <ReactMarkdown remarkPlugins={[remarkBreaks]}>
-                {content.bio}
+                {bio}
             </ReactMarkdown>
         </div>
     </section>
 );
 
 export const News: React.FC = () => {
-    const typedNewsData = newsData as NewsItem[];
+    const news: NewsItem[] = newsData;
     const listRef = useRef<HTMLDivElement>(null);
     // Cap the list to exactly the first 3 items' rendered height (rather than a
     // guessed px value) so a 4th+ item always scrolls instead of just showing.
-    const [maxHeight, setMaxHeight] = useState<number | 'none'>('none');
 
     useLayoutEffect(() => {
         const list = listRef.current;
         if (!list) return;
         const items = list.querySelectorAll<HTMLElement>('.news-item');
-        setMaxHeight(items.length > 3 ? items[3].offsetTop : 'none');
-    }, [typedNewsData.length]);
+        const syncHeight = () => {
+            const fourthItem = items[3];
+            list.style.maxHeight = fourthItem
+                ? `${fourthItem.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop}px`
+                : 'none';
+        };
+        syncHeight();
+        // Row heights change when dates stack on mobile or text wraps after
+        // fonts load. Observe the rows so the three-item cap stays accurate.
+        const observer = new ResizeObserver(syncHeight);
+        items.forEach(item => observer.observe(item));
+        return () => observer.disconnect();
+    }, [news.length]);
 
     return (
-        <section className="fade-in" style={{ marginBottom: '1.25rem' }}>
+        <section className="fade-in">
             <h2>Recent News</h2>
             <div className="glass-card news-card">
-                <div className="news-scroll-list" ref={listRef} style={{ maxHeight }}>
-                    {typedNewsData.map((item, index) => (
+                <div className="news-scroll-list" ref={listRef}>
+                    {news.map((item, index) => (
                         <div key={index} className="news-item">
                             <span className="news-date">{item.date}</span>
-                            <span className="news-content">{item.content}</span>
+                            <span className="news-content">
+                                <ReactMarkdown
+                                    allowedElements={['strong', 'em', 'a', 'code', 'br']}
+                                    unwrapDisallowed
+                                    skipHtml
+                                >
+                                    {item.content}
+                                </ReactMarkdown>
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -60,46 +75,19 @@ export const News: React.FC = () => {
     );
 };
 
-const institutionDetails: Record<string, { fallbackText: string; logo: string; bgClass: string }> = {
-    "Duke University": {
-        fallbackText: "D",
-        logo: "/logos/duke.svg",
-        bgClass: "bg-duke"
-    },
-    "National Taiwan University": {
-        fallbackText: "NTU",
-        logo: "/logos/ntu.png",
-        bgClass: "bg-ntu"
-    },
-    "University of Notre Dame": {
-        fallbackText: "ND",
-        logo: "/logos/notredame.svg",
-        bgClass: "bg-notredame"
-    },
-    "Academia Sinica": {
-        fallbackText: "AS",
-        logo: "/logos/sinica.svg",
-        bgClass: "bg-sinica"
-    },
-    "Irving T. Ho Memorial Foundation": {
-        fallbackText: "ITH",
-        logo: "/logos/irving-t-ho-foundation.png",
-        bgClass: ""
-    }
-};
+const institutionDetails: Record<string, Institution> = institutions;
 
 const TimelineLogo: React.FC<{ institution: string }> = ({ institution }) => {
     const [imgError, setImgError] = React.useState(false);
     const details = institutionDetails[institution] || {
-        fallbackText: institution.charAt(0),
-        logo: "",
-        bgClass: ""
+        initials: institution.charAt(0),
+        logo: ""
     };
 
     if (imgError || !details.logo) {
         return (
-            <div className={`timeline-logo-fallback ${details.bgClass}`} style={!details.bgClass ? { backgroundColor: 'var(--primary)' } : undefined}>
-                {details.fallbackText}
+            <div className="timeline-logo-fallback" style={{ backgroundColor: details.color ?? 'var(--primary)' }}>
+                {details.initials}
             </div>
         );
     }
@@ -114,14 +102,6 @@ const TimelineLogo: React.FC<{ institution: string }> = ({ institution }) => {
     );
 };
 
-const TimelineAffiliation: React.FC<{ institution: string }> = ({ institution }) => {
-    return (
-        <span className="timeline-affiliation">
-            {institution}
-        </span>
-    );
-};
-
 interface TimelineItemProps {
     title: string;
     time: string;
@@ -133,8 +113,8 @@ interface TimelineItemProps {
 
 /** A single row within a unified section card — icon and text are both normal-flow
  *  children inside the glass card (icon centered via flexbox, not absolute positioning). */
-const TimelineRow: React.FC<TimelineItemProps & { isLast: boolean }> = ({ title, time, affiliation, location, note, isLast }) => (
-    <div className={`exp-row${isLast ? '' : ' exp-row-divider'}`}>
+const TimelineRow: React.FC<TimelineItemProps> = ({ title, time, affiliation, location, note }) => (
+    <div className="exp-row">
         <div className="exp-icon-col">
             <TimelineLogo institution={affiliation} />
         </div>
@@ -145,7 +125,7 @@ const TimelineRow: React.FC<TimelineItemProps & { isLast: boolean }> = ({ title,
                 <span className="timeline-meta-text">{time}</span>
             </div>
             <div className="timeline-row">
-                <TimelineAffiliation institution={affiliation} />
+                <span className="timeline-affiliation">{affiliation}</span>
                 {location && <span className="timeline-meta-text timeline-location">{location}</span>}
             </div>
             {note && <p className="text-secondary timeline-note">{note}</p>}
@@ -163,9 +143,9 @@ function TimelineSection<T>({ heading, items, map }: {
     return (
         <section className="fade-in">
             <h2>{heading}</h2>
-            <div className="glass-card section-card">
+            <div className="glass-card">
                 {items.map((item, index) => (
-                    <TimelineRow key={index} {...map(item)} isLast={index === items.length - 1} />
+                    <TimelineRow key={index} {...map(item)} />
                 ))}
             </div>
         </section>
@@ -173,7 +153,7 @@ function TimelineSection<T>({ heading, items, map }: {
 }
 
 export const Education: React.FC = () => (
-    <TimelineSection
+    <TimelineSection<EducationItem>
         heading="Education"
         items={content.education}
         map={(item) => ({ title: item.degree, time: item.year, affiliation: item.institution, location: item.location, note: item.details })}
@@ -181,7 +161,7 @@ export const Education: React.FC = () => (
 );
 
 export const Experience: React.FC = () => (
-    <TimelineSection
+    <TimelineSection<ExperienceItem>
         heading="Experience"
         items={content.experience}
         map={(item) => ({ title: item.role, time: item.time, affiliation: item.institution, location: item.location, note: item.details })}
@@ -189,170 +169,24 @@ export const Experience: React.FC = () => (
 );
 
 export const SelectedAwards: React.FC = () => (
-    <TimelineSection
+    <TimelineSection<AwardItem>
         heading="Selected Awards"
         items={content.awards}
         map={(item) => ({ title: item.name, time: item.year, affiliation: item.organization, location: item.location, note: item.description })}
     />
 );
 
-export const Publications: React.FC<{ title?: string; selectedOnly?: boolean }> = ({ title = "Publications", selectedOnly = false }) => {
-    const [visibleCount, setVisibleCount] = useState(5);
-    const typedPublicationsData = publicationsData as Publication[];
-
-    const filteredPubs = selectedOnly
-        ? typedPublicationsData.filter(pub => pub.selected)
-        : typedPublicationsData;
-
-    return (
-        <section className="fade-in">
-            {title && <h2>{title}</h2>}
-            <div className="glass-card">
-                <div>
-                    {filteredPubs.slice(0, visibleCount).map((pub, index) => (
-                        <div key={index} className="pub-entry">
-                            {pub.status && (
-                                <div className="pub-status">
-                                    {pub.status}
-                                </div>
-                            )}
-                            <h3 className="pub-title">{pub.title}</h3>
-                            <p className="pub-authors">
-                                {pub.authors.map((a, i) => (
-                                    <span key={i} style={{ fontWeight: a === "Yi-Chun Liao" ? 700 : 400 }}>
-                                        {a}{i < pub.authors.length - 1 ? ', ' : ''}
-                                    </span>
-                                ))}
-                            </p>
-                            <p className="text-secondary pub-venue">
-                                {pub.venue}, {pub.year}
-                            </p>
-
-                            <details className="pub-abstract">
-                                <summary>Abstract</summary>
-                                <p className="pub-abstract-text">{pub.abstract}</p>
-                            </details>
-
-                            <div className="pub-links">
-                                {pub.links.paper && <a href={pub.links.paper} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Paper</a>}
-                                {pub.links.github && <a href={pub.links.github} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">GitHub</a>}
-                                {pub.links.arxiv && <a href={pub.links.arxiv} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Arxiv</a>}
-                                {pub.links.ieee && <a href={pub.links.ieee} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">IEEE</a>}
-                                {pub.links.acm && <a href={pub.links.acm} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">ACM</a>}
-                                {pub.links.code && <a href={pub.links.code} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">Code</a>}
-                                {pub.links.pdf && <a href={pub.links.pdf} target="_blank" rel="noopener noreferrer" className="glass-card btn pub-btn">PDF</a>}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            {visibleCount < filteredPubs.length && (
-                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-                    <button
-                        onClick={() => setVisibleCount(prev => prev + 5)}
-                        className="btn text-primary"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', padding: '0.5rem 1rem' }}
-                        title="Show more publications"
-                    >
-                        Show More
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                </div>
-            )}
-        </section>
-    );
-};
-
 export const Teaching: React.FC = () => (
-    <TimelineSection
+    <TimelineSection<TeachingItem>
         heading="Teaching"
         items={content.teaching}
         map={(item) => ({ title: item.course, time: item.year, affiliation: item.institution, location: item.location, note: item.details })}
     />
 );
 
-export const Service: React.FC = () => (
+export const Reviewer: React.FC = () => (
     <section className="fade-in">
-        <h2>Professional Service</h2>
-        <div className="glass-card">
-            <div>
-                {content.service.map((item, index) => (
-                    <div key={index} className="mobile-stack service-entry" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                        <div>
-                            <p style={{ fontWeight: 700, margin: 0 }}>{item.role}</p>
-                            <p className="text-secondary" style={{ margin: 0 }}>{item.organization}</p>
-                        </div>
-                        <span style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>{item.years}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <h2>Reviewer</h2>
+        <TagList items={content.reviewer.map(item => `${item.venue} ${item.years}`)} />
     </section>
 );
-
-export const VisitorMap: React.FC = () => {
-    const [mapKey, setMapKey] = React.useState(0);
-    const [currentTheme, setCurrentTheme] = React.useState(() =>
-        typeof document === 'undefined' ? 'light' : document.documentElement.getAttribute('data-theme') || 'light'
-    );
-
-    React.useEffect(() => {
-        let timeoutId: any;
-        const handleResize = () => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                setMapKey(prev => prev + 1);
-            }, 1000);
-        };
-
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'data-theme') {
-                    const newTheme = document.documentElement.getAttribute('data-theme') || 'light';
-                    setCurrentTheme(newTheme);
-                    setMapKey(prev => prev + 1);
-                }
-            });
-        });
-
-        observer.observe(document.documentElement, { attributes: true });
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            observer.disconnect();
-        };
-    }, []);
-
-    React.useEffect(() => {
-        const container = document.getElementById('map-container');
-        if (container) {
-            container.innerHTML = '';
-            const oldScript = document.getElementById('mapmyvisitors');
-            if (oldScript) oldScript.remove();
-
-            const isDark = currentTheme === 'dark';
-            const landColor = isDark ? 'd4af37' : '002147';
-            const oceanColor = isDark ? '001938' : 'fefefe';
-            const textColor = isDark ? 'ffffff' : '002147';
-            const dotColor = isDark ? 'ffffff' : 'd4af37';
-
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.id = 'mapmyvisitors';
-            script.src = `//mapmyvisitors.com/map.js?d=mo0RB99k6P3fYzjUxr00Is-1QQvHCH6gC-ZSKlyMPIQ&cl=${landColor}&w=a&co=${oceanColor}&ct=${textColor}&t=tt&cmn=${dotColor}&cmo=${dotColor}`;
-            container.appendChild(script);
-        }
-    }, [mapKey, currentTheme]);
-
-    return (
-        <section className="fade-in">
-            <h2>Visitors</h2>
-            <div className="glass-card" style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', padding: 0, overflow: 'hidden' }}>
-                <div id="map-container" style={{ width: '100%' }}></div>
-            </div>
-        </section>
-    );
-};

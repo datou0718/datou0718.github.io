@@ -4,6 +4,7 @@ import { renderSeoHead } from './src/seo'
 
 // https://vite.dev/config/
 export default defineConfig({
+  publicDir: 'content/public',
   plugins: [
     react(),
     {

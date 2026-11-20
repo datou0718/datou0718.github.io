@@ -1,7 +1,7 @@
-import { content } from './data/content';
-import posts from './data/posts.json';
+import { content } from './content';
+import posts from '../content/posts.json';
 
-export const siteUrl = 'https://datou0718.github.io/';
+export const siteUrl = content.siteUrl;
 const name = `${content.name.english} (${content.name.chinese})`;
 const homeDescription = `${name}, ${content.title}. Research in ${content.researchInterests.join(' and ').toLowerCase()}. Publications, experience, and posts.`;
 
@@ -73,6 +73,7 @@ export function getSeoTags(pathname: string): SeoTag[] {
     ],
   };
   return [
+    { key: 'icon', tag: 'link', attrs: { rel: 'icon', href: content.headshot } },
     { key: 'title', tag: 'title', text: title },
     { key: 'description', tag: 'meta', attrs: { name: 'description', content: description } },
     { key: 'author', tag: 'meta', attrs: { name: 'author', content: content.name.english } },

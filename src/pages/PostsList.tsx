@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import postsData from '../data/posts.json';
+import postsData from '../../content/posts.json';
 
 const posts = [...postsData].sort((a, b) =>
     new Date(b.date).getTime() - new Date(a.date).getTime()

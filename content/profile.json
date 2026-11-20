@@ -1,0 +1,100 @@
+{
+  "siteUrl": "https://datou0718.github.io/",
+  "name": {
+    "english": "Yi-Chun Liao",
+    "chinese": "廖奕鈞"
+  },
+  "title": "Ph.D. Student in Duke ECE",
+  "email": "yi-chun.liao@duke.edu",
+  "headshot": "/assets/me.jpg",
+  "cv": "/assets/CV.pdf",
+  "profiles": {
+    "github": "https://github.com/datou0718",
+    "scholar": "https://scholar.google.com/citations?user=n7W1nP8AAAAJ&hl=en",
+    "linkedin": "https://www.linkedin.com/in/yi-chun-liao-07b414269/",
+    "instagram": "https://www.instagram.com/datou_0718/"
+  },
+  "researchInterests": [
+    "In-Memory Computing",
+    "Algorithm-Hardware Co-Design",
+    "Content-Addressable Memory"
+  ],
+  "education": [
+    {
+      "degree": "Ph.D. in Electrical and Computer Engineering",
+      "institution": "Duke University",
+      "year": "2026 - Present",
+      "location": "Durham, NC"
+    },
+    {
+      "degree": "B.Sc. in Computer Science and Information Engineering",
+      "institution": "National Taiwan University",
+      "year": "2021 - 2026",
+      "location": "Taipei, Taiwan"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Research Assistant",
+      "institution": "Duke University",
+      "time": "2026 - Present",
+      "location": "Durham, NC",
+      "details": "Advisors: Prof. Yiran Chen and Prof. Hai \"Helen\" Li"
+    },
+    {
+      "role": "Research Intern",
+      "institution": "University of Notre Dame",
+      "time": "2025 - 2026",
+      "location": "Notre Dame, IN",
+      "details": "Advisor: Prof. X. Sharon Hu"
+    },
+    {
+      "role": "Research Assistant",
+      "institution": "Academia Sinica",
+      "time": "2024 - 2026",
+      "location": "Taipei, Taiwan",
+      "details": "Advisors: Prof. Yuan-Hao Chang and Prof. Tei-Wei Kuo"
+    },
+    {
+      "role": "Research Assistant",
+      "institution": "Academia Sinica",
+      "time": "2023 - 2024",
+      "location": "Taipei, Taiwan",
+      "details": "Advisor: Prof. Yennun Huang"
+    }
+  ],
+  "awards": [
+    {
+      "name": "First Place of Bachelor Thesis Award",
+      "organization": "National Taiwan University",
+      "year": "2025",
+      "location": "Taipei, Taiwan"
+    },
+    {
+      "name": "Dean's List Award",
+      "organization": "National Taiwan University",
+      "year": "2025",
+      "location": "Taipei, Taiwan"
+    },
+    {
+      "name": "Irving T. Ho Memorial Scholarship",
+      "organization": "Irving T. Ho Memorial Foundation",
+      "year": "2024",
+      "location": "Taipei, Taiwan"
+    }
+  ],
+  "teaching": [
+    {
+      "course": "CSIE3340 Computer Architecture",
+      "institution": "National Taiwan University",
+      "year": "2024",
+      "location": "Taipei, Taiwan"
+    }
+  ],
+  "reviewer": [
+    {
+      "venue": "ISCAS",
+      "years": "2026"
+    }
+  ]
+}

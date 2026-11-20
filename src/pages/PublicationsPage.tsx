@@ -1,5 +1,5 @@
 import React from 'react';
-import { Publications } from '../components/Sections';
+import Publications from '../components/Publications';
 
 const PublicationsPage: React.FC = () => {
   return (

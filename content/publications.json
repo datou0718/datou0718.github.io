@@ -1,0 +1,125 @@
+[
+    {
+        "status": "Under Review",
+        "title": "RE-CAM: Readout-Enhanced Content-Addressable Memory for Quantitative Similarity Search",
+        "authors": [
+            "Yi-Chun Liao",
+            "Dongyoung Lee",
+            "Jiazheng Chen",
+            "Tergel Molom-Ochir",
+            "Tomohisa Kawakami",
+            "Tania Roy",
+            "Ik-Joon Chang",
+            "X. Sharon Hu",
+            "Hai \"Helen\" Li",
+            "Yiran Chen"
+        ],
+        "venue": "arXiv",
+        "year": 2026,
+        "abstract": "Similarity search is essential to many applications but incurs massive data movement when executed on conventional architectures. Content-addressable memory (CAM) is a promising hardware substrate, as it allows similarity search directly in the CAM array, minimizing data movement and offering both low latency and high energy efficiency. However, conventional CAM array readout produces only binary match results, discarding quantitative similarity information that could be further exploited. Extracting this information requires interpreting the CAM array output voltage that evolves during a CAM search, making the sensing timestamp a crucial design variable alongside the reference voltage and decoding parameter. In this work, we propose RE-CAM, a readout enhancement framework for CAM that is agnostic to memory technology and application, enabling CAM array readout to approximate linear and nonlinear functions with one CAM search. By reusing the comparators to sense the time-varying output voltage multiple times, jointly optimizing the three design variables under system constraints and hardware nonidealities, and co-designing the optimization algorithm and reconfigurable hardware, RE-CAM achieves accurate approximation with low energy and area overhead without introducing a readout throughput bottleneck. Across linear, piecewise-linear, sigmoid, and exponential functions, RE-CAM reduces normalized root mean square error by 10.89% to 24.34% for general approximation and 29.43% to 46.73% when exploiting dataset distribution, compared to a shared uniform-reference ADC baseline with the same comparison budget. Relative to the same baseline, RE-CAM also achieves 8× higher search throughput while reducing energy per search and area by 47% and 39%, respectively.",
+        "selected": true,
+        "researchQuestion": "Can CAM array readout be extended beyond binary match results with minimal overhead?",
+        "figure": {
+            "src": "/assets/publications/recam-readout.png",
+            "alt": "RE-CAM Figure 1: binary readout merges distinct similarity levels, while RE-CAM uses multiple sensing timestamps and hardware-aware training to produce quantitative similarity scores.",
+            "width": 1600,
+            "height": 966
+        },
+        "links": {
+            "paper": "https://arxiv.org/abs/2611.25326",
+            "github": "https://github.com/datou0718/RE-CAM"
+        }
+    },
+    {
+        "status": "Under Review",
+        "title": "CAIMS: Scalable Cross-Array In-Memory Search",
+        "authors": [
+            "Yi-Chun Liao",
+            "Liu Liu",
+            "Ruiyang Qin",
+            "Yiran Chen",
+            "X. Sharon Hu"
+        ],
+        "venue": "arXiv",
+        "year": 2026,
+        "abstract": "Search, especially top-k similarity search, plays a vital role in many applications, but its performance can be severely limited by memory access overhead. In-memory search (IMS), an alternative to CPU/GPU-based approaches, exploits massive parallelism within a content-addressable memory (CAM) array to perform search in situ and provides both low latency and high energy efficiency. However, the capacity of a single CAM array is often insufficient for modern workloads, requiring data to be distributed across multiple arrays. Deploying scalable top-k similarity search across multiple CAM arrays poses a fundamental problem that existing designs fail to address: how to accurately and efficiently reduce local binary match results to global top-k results. This work introduces CAIMS, a cross-array IMS framework that is agnostic to memory technologies and applications, enabling scalable and efficient top-k similarity search while preserving accuracy. To enable accurate top-k result reduction, CAIMS leverages the existing threshold match functionality with a combined offline and online parameter selection approach to transform local binary match results that lack globally comparable similarity information into global coarse-grained similarity scores. To further improve efficiency, CAIMS conducts hierarchical reduction and transfers only the selection results and necessary control signals with lightweight local peripherals. Implemented on a 3D NAND Flash model and demonstrated using the retrieval phase of retrieval-augmented generation, CAIMS improves throughput by up to 22.3×/10.1× and energy efficiency by 426.6×/23.7× compared to the server-class CPU baseline and prior 3D NAND Flash accelerators, respectively, while maintaining comparable accuracy.",
+        "selected": true,
+        "researchQuestion": "How to search with CAM when data is distributed across multiple arrays?",
+        "figure": {
+            "src": "/assets/publications/caims-overview.png",
+            "alt": "CAIMS overview: query quantization, Dataset-Assisted Scalable Search (DASS), Online Result Count Adaptation (ORCA), and Local Aggregation and Selective Transfer (LAST).",
+            "width": 1600,
+            "height": 817
+        },
+        "links": {
+            "paper": "https://arxiv.org/abs/2611.25141",
+            "github": "https://github.com/datou0718/CAIMS"
+        }
+    },
+    {
+        "status": "TCAD '26",
+        "title": "RETENTION: Resource-Efficient Tree-Based Ensemble Model Acceleration with Content-Addressable Memory",
+        "authors": [
+            "Yi-Chun Liao",
+            "Chieh-Lin Tsai",
+            "Yuan-Hao Chang",
+            "Camélia Slimani",
+            "Jalil Boukhobza",
+            "Tei-Wei Kuo"
+        ],
+        "venue": "IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems",
+        "year": 2026,
+        "abstract": "Although deep learning has demonstrated remarkable capability in learning from unstructured data, modern tree-based ensemble models remain superior in extracting relevant information and learning from structured datasets. While several efforts have been made to accelerate tree-based models, the inherent characteristics of the models pose significant challenges for conventional accelerators. Recent research leveraging content-addressable memory (CAM) offers a promising solution for accelerating tree-based models, yet existing designs suffer from excessive memory consumption and low utilization. This work addresses these challenges by introducing RETENTION, an end-to-end framework that significantly reduces CAM capacity requirement for tree-based model inference. We propose an iterative pruning algorithm with a novel pruning criterion tailored for bagging-based models (e.g., Random Forest), which minimizes model complexity while ensuring controlled accuracy degradation. Additionally, we present a tree mapping scheme that incorporates two innovative data placement strategies to alleviate the memory redundancy caused by the widespread use of don’t care states in CAM. Experimental results show that implementing the tree mapping scheme alone reduces CAM capacity requirement by 1.46× to 21.30×, while the full RETENTION framework achieves 4.35× to 207.12× reduction with less than 3% accuracy loss. These results demonstrate that RETENTION is highly effective in minimizing CAM resource demand, providing a resource-efficient direction for tree-based model acceleration.",
+        "selected": true,
+        "researchQuestion": "How to efficiently accelerate tree-based models with CAM considering capacity redundancy?",
+        "figure": {
+            "src": "/assets/publications/retention-overview.png",
+            "alt": "RETENTION overview: model training with purity threshold pruning, followed by occurrence-based double reordering or similarity-based path clustering for CAM mapping.",
+            "width": 1600,
+            "height": 834
+        },
+        "links": {
+            "paper": "https://ieeexplore.ieee.org/abstract/document/11511658",
+            "github": "https://github.com/datou0718/RETENTION"
+        }
+    },
+    {
+        "status": "CODES+ISSS '25 WIP",
+        "title": "Practicalizing Tree-Based Model Acceleration with CAM through Model Pruning and Data Placement Optimization",
+        "authors": [
+            "Yi-Chun Liao",
+            "Chieh-Lin Tsai",
+            "Yuan-Hao Chang",
+            "Camélia Slimani",
+            "Jalil Boukhobza",
+            "Tei-Wei Kuo"
+        ],
+        "venue": "ACM/IEEE International Conference on Hardware/Software Codesign and System Synthesis",
+        "year": 2025,
+        "abstract": "Tree-based model remains state-of-the-art for many tasks involving tabular data. While these models are favored in resource-constrained environments, the inherent characteristics result in inefficiency during inference, posing significant challenges for conventional accelerators. Recent research has achieved unprecedented acceleration with content-addressable memory (CAM), yet at the cost of overwhelming memory consumption with low utilization, which is impractical for numerous real-world applications. This work addresses these issues by introducing an end-to-end framework RETENTION. RETENTION incorporates (1) a pruning algorithm to minimize model complexity under a user-specified accuracy loss tolerance, and (2) two data placement strategies to enhance memory utilization and further reduce capacity requirement. Experiment results show that space efficiency can be improved from 4.35× to 207.12× with less than 3% accuracy loss.",
+        "selected": false,
+        "links": {
+            "paper": "https://dl.acm.org/doi/abs/10.1145/3742873.3758342",
+            "github": "https://github.com/datou0718/RETENTION"
+        }
+    },
+    {
+        "status": "DSN '24",
+        "title": "IPMES: A Tool for Incremental TTP Detection Over the System Audit Event Stream",
+        "authors": [
+            "Hong-Wei Li",
+            "Ping-Ting Liu",
+            "Bo-Wei Lin",
+            "Yi-Chun Liao",
+            "Yennun Huang"
+        ],
+        "venue": "IEEE/IFIP International Conference on Dependable Systems and Networks",
+        "year": 2024,
+        "abstract": "Advanced persistent threat (APT) cyberattacks are serious threats to corporations and governments. The prolong dwell time associated with APTs significantly increase the difficulty on detecting them in provenance graphs. To reduce the detection complexity, some works have demonstrated the effectiveness of employing pattern matching on provenance graphs in conjunction with APT lifecycle models to pinpoint short-duration attack steps, also known as “tactics, techniques, and procedures” (TTPs). However, when dealing with more complex TTPs, particularly those involving graph-based and partial ordering, few tools can incrementally and efficiently handle them. In this paper, we present IPMES, a tool that has been publicly released to address this gap. By leveraging specific optimizations, it provides efficient incremental matching for those TTPs, and can handle practical system audit event streams. Experiments conducted on synthetic and real-world data demonstrated the practical feasibility of IPMES in TTP detection.",
+        "selected": false,
+        "links": {
+            "paper": "https://ieeexplore.ieee.org/abstract/document/10646966",
+            "github": "https://github.com/littleponywork/IPMES"
+        }
+    }
+]
