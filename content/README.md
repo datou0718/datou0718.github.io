@@ -127,8 +127,8 @@ There are no separate country or region fields, and provider wording is not
 added to the displayed name. `"Frankfurt, Germany"` uses the previously
 verified Frankfurt coordinates and shows **Frankfurt**.
 
-The array order controls the route; the map initially selects the latest
-visit and its counter uses chronological visit numbers.
+The array order controls the route; the map starts at visit 1 (the earliest
+visit), and its counter uses chronological visit numbers.
 
 Coordinates resolve automatically during `npm run build` / `npm run check`
 and when you open or edit the site with `npm run dev`. New location labels
@@ -143,19 +143,31 @@ matches. Use a more specific location string, such as
 `"Springfield, Massachusetts"`; no extra fields are needed. The resolver
 never rewrites your labels or adds administrative wording to the map.
 
-Repeat an entry to show a return visit. Use the previous/next arrows below
-the map to step through every visit; the counter shows the selected visit
-number and total. Previous moves to an earlier visit, next to a later one.
-The arrows stop at the first and last visit. Visits at the same coordinates
-share a marker; select a shared marker to cycle through its visits. Map points
-are unnumbered. The current city is filled, the next destination is outlined,
-and their connecting leg is highlighted. Other points and routes are subdued.
-At the final visit, only the current city is highlighted.
-Lines connect consecutive cities along great-circle arcs, including across
-the Pacific. They indicate visit order, not exact flight or road itineraries.
-Zoom with the buttons, then drag the map to pan; keyboard users can focus the
-map and use arrow keys, or press Home to reset. An empty array (`[]`) shows an
-empty world map, and a single entry shows just its marker.
+Repeat an entry to show a return visit. The map displays one position marker
+and one city name. While moving, the label shows the destination city.
+At rest, it shows the selected city. Previous and Next move the marker
+smoothly to the adjacent visit; the counter changes as soon as you select a visit.
+If you click again during movement, the marker redirects from its current
+position. Repeat visits remain separate steps, including visits to the
+same city.
+
+Reset returns to visit 1; Now selects the latest visit. Both animate to the
+selected city while keeping the current zoom level. These buttons sit
+beside the visit arrows; the separate − and + buttons control zoom.
+Play continues from the current visit and advances once per second, using
+the same marker and smooth movement. At the final visit, Play restarts at
+visit 1. Stop freezes the position; Play resumes the unfinished movement
+from that position. Manual selection or panning stops playback. Play is
+disabled when there are fewer than two visits.
+
+All route segments have the same visibility, with no active-leg highlight. Lines follow
+great-circle arcs, including across the Pacific; they indicate visit order,
+not exact flight or road itineraries. The map pans smoothly when zoomed in.
+Zoom with the buttons and drag to pan; keyboard users can focus the map and
+use arrow keys, or press Home to return to visit 1 without changing zoom.
+Reduced-motion preferences skip movement animations and keep playback at
+one visit per second. An empty array (`[]`) shows an empty world map;
+a single entry shows its position and city name.
 
 The world outline and resolved coordinates are bundled with the website.
 Visitors do not make geocoding requests, need API keys, or share their location.

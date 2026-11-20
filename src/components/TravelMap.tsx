@@ -1,11 +1,11 @@
-import { useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
-import { geoEqualEarth, geoGraticule10, geoPath } from 'd3-geo';
+import { geoEqualEarth, geoGraticule10, geoInterpolate, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import world from '../assets/world-land.json';
 import type { TravelStop } from '../types/content';
-import TravelMapLabels from './TravelMapLabels';
+import TravelMapLabel from './TravelMapLabel';
 
 const width = 1000;
 const height = 520;
@@ -18,6 +18,11 @@ const oceanPath = path(sphere) ?? '';
 const gridPath = path(geoGraticule10()) ?? '';
 const initialView = { scale: 1, x: 0, y: 0 };
 type View = typeof initialView;
+type Coordinates = [number, number];
+interface Motion { from: Coordinates; to: Coordinates; index: number; auto: boolean }
+const coordinates = (stop: TravelStop): Coordinates => [stop.longitude, stop.latitude];
+const samePosition = (a: Coordinates, b: Coordinates) => a[0] === b[0] && a[1] === b[1];
+const ease = (t: number) => t * t * (3 - 2 * t);
 
 function constrain(view: View): View {
   return {
@@ -27,64 +32,147 @@ function constrain(view: View): View {
   };
 }
 
-function routePath(stops: TravelStop[]): string {
-  const coordinates = stops.map(stop => [stop.longitude, stop.latitude]);
-  return coordinates.length > 1 ? path({ type: 'LineString', coordinates }) ?? '' : '';
+function routePath(points: Coordinates[]): string {
+  return points.length > 1 ? path({ type: 'LineString', coordinates: points }) ?? '' : '';
+}
+
+function centerOn(position: Coordinates | null, scale: number): View {
+  const point = position ? projection(position)! : [width / 2, height / 2];
+  return constrain({ scale, x: width / 2 - point[0] * scale, y: height / 2 - point[1] * scale });
 }
 
 export default function TravelMap({ stops }: { stops: TravelStop[] }) {
   const id = useId();
-  const [selectedIndex, setSelected] = useState(() => Math.max(0, stops.length - 1));
+  const [selectedIndex, setSelected] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [motion, setMotion] = useState<Motion | null>(null);
+  const [position, setPosition] = useState<Coordinates | null>(() => stops[0] ? coordinates(stops[0]) : null);
+  const positionRef = useRef(position);
+  const frameRef = useRef(0);
+  const pausedVisitRef = useRef<number | null>(null);
   const selected = Math.min(selectedIndex, Math.max(0, stops.length - 1));
-  const [view, setView] = useState(initialView);
-  const drag = useRef<{ id: number; x: number; y: number; view: View } | null>(null);
   const current = stops[selected];
-  const next = stops[selected + 1];
-  const nextRoute = next ? routePath(stops.slice(selected, selected + 2)) : '';
-  const markers = new Map<string, number[]>();
-  stops.forEach((stop, index) => {
-    const key = `${stop.longitude},${stop.latitude}`;
-    markers.set(key, [...(markers.get(key) ?? []), index]);
-  });
+  const displayedStop = stops[motion?.index ?? selected];
+  const atCurrent = !!current && !!position && samePosition(position, coordinates(current));
+  const [view, setView] = useState(initialView);
+  const viewRef = useRef(initialView);
+  const updateView = useCallback((value: View) => {
+    viewRef.current = value;
+    setView(value);
+  }, []);
+  const updatePosition = useCallback((value: Coordinates) => {
+    positionRef.current = value;
+    setPosition(value);
+  }, []);
+  const drag = useRef<{ id: number; x: number; y: number; view: View } | null>(null);
+  const fullRoute = useMemo(() => routePath(stops.map(coordinates)), [stops]);
+  const point = position ? projection(position) : null;
+  const x = point ? (point[0] * view.scale + view.x) / width * 100 : 0;
+  const y = point ? (point[1] * view.scale + view.y) / height * 100 : 0;
+  const visible = !!point && x >= 0 && x <= 100 && y >= 0 && y <= 100;
 
-  const visibleMarkers = [...markers.entries()].map(([key, indices]) => {
-    const active = indices.includes(selected);
-    const upcoming = !!next && indices.includes(selected + 1);
-    const index = active ? selected : upcoming ? selected + 1 : indices[0];
-    const stop = stops[index];
-    const [px, py] = projection([stop.longitude, stop.latitude])!;
-    const x = (px * view.scale + view.x) / width * 100;
-    const y = (py * view.scale + view.y) / height * 100;
-    return { key, indices, index, stop, x, y, active, upcoming };
-  }).filter(marker => marker.x >= 0 && marker.x <= 100 && marker.y >= 0 && marker.y <= 100);
-  const labels = visibleMarkers.filter(marker => marker.active || marker.upcoming)
-    .map(({ key, stop, x, y, active, upcoming }) => ({ key, label: stop.label, x, y, active, upcoming }));
+  useEffect(() => {
+    if (!motion) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = reducedMotion ? 0 : motion.auto ? 850 : 600;
+    const cycle = motion.auto ? 1000 : duration;
+    const interpolate = geoInterpolate(motion.from, motion.to);
+    const started = performance.now();
+    let cameraStart = viewRef.current;
+    let cameraStarted = 0;
+    const tick = (now: number) => {
+      const elapsed = now - started;
+      if (elapsed >= cycle) {
+        updatePosition(motion.to);
+        if (viewRef.current.scale > 1) updateView(centerOn(motion.to, viewRef.current.scale));
+        if (motion.auto) setSelected(motion.index);
+        const next = motion.auto ? stops[motion.index + 1] : undefined;
+        if (next) {
+          setMotion({ from: motion.to, to: coordinates(next), index: motion.index + 1, auto: true });
+        } else {
+          setMotion(null);
+          setPlaying(false);
+        }
+        return;
+      }
+      if (!reducedMotion) {
+        updatePosition(interpolate(ease(Math.min(elapsed / duration, 1))) as Coordinates);
+        const view = viewRef.current;
+        if (view.scale > 1) {
+          if (view.scale !== cameraStart.scale) {
+            cameraStart = view;
+            cameraStarted = elapsed;
+          }
+          const end = centerOn(motion.to, view.scale);
+          const t = ease(Math.min((elapsed - cameraStarted) / Math.max(1, duration - cameraStarted), 1));
+          updateView({ scale: view.scale,
+            x: cameraStart.x + (end.x - cameraStart.x) * t,
+            y: cameraStart.y + (end.y - cameraStart.y) * t });
+        }
+      }
+      frameRef.current = window.requestAnimationFrame(tick);
+    };
+    frameRef.current = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameRef.current);
+  }, [motion, stops, updatePosition, updateView]);
 
-  function centerOn(stop: TravelStop | undefined, scale: number): View {
-    const point = stop ? projection([stop.longitude, stop.latitude])! : [width / 2, height / 2];
-    return constrain({ scale, x: width / 2 - point[0] * scale, y: height / 2 - point[1] * scale });
+  function stopMotion() {
+    if (motion) pausedVisitRef.current = motion.index;
+    window.cancelAnimationFrame(frameRef.current);
+    setMotion(null);
+    setPlaying(false);
   }
 
   function selectStop(index: number) {
+    const target = stops[index];
+    if (!target) return;
+    stopMotion();
+    pausedVisitRef.current = null;
     setSelected(index);
-    if (view.scale > 1) setView(centerOn(stops[index], view.scale));
+    const to = coordinates(target);
+    const from = positionRef.current;
+    if (from && !samePosition(from, to)) {
+      setMotion({ from, to, index, auto: false });
+    } else {
+      updatePosition(to);
+      if (viewRef.current.scale > 1) updateView(centerOn(to, viewRef.current.scale));
+    }
+  }
+
+  function togglePlayback() {
+    stopMotion();
+    if (playing || stops.length < 2) return;
+    const restart = selected === stops.length - 1 && atCurrent;
+    const index = restart ? 1 : pausedVisitRef.current ?? selected + 1;
+    const target = stops[index];
+    const from = restart ? coordinates(stops[0]) : positionRef.current;
+    if (!target || !from) return;
+    pausedVisitRef.current = null;
+    if (restart) {
+      setSelected(0);
+      updatePosition(from);
+      if (viewRef.current.scale > 1) updateView(centerOn(from, viewRef.current.scale));
+    }
+    setPlaying(true);
+    setMotion({ from, to: coordinates(target), index, auto: true });
   }
 
   function zoom(factor: number) {
-    setView(centerOn(current, Math.max(1, Math.min(8, view.scale * factor))));
+    updateView(centerOn(positionRef.current, Math.max(1, Math.min(8, viewRef.current.scale * factor))));
   }
 
   function startDrag(event: PointerEvent<HTMLDivElement>) {
-    if (view.scale === 1 || event.button !== 0 || (event.target as Element).closest('button')) return;
+    if (view.scale === 1 || event.button !== 0) return;
+    stopMotion();
     event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, view };
+    drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, view: viewRef.current };
   }
 
   function moveDrag(event: PointerEvent<HTMLDivElement>) {
     const start = drag.current;
     if (!start || start.id !== event.pointerId) return;
     const ratio = width / event.currentTarget.getBoundingClientRect().width;
-    setView(constrain({
+    updateView(constrain({
       scale: start.view.scale,
       x: start.view.x + (event.clientX - start.x) * ratio,
       y: start.view.y + (event.clientY - start.y) * ratio,
@@ -98,12 +186,14 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
     };
     if (moves[event.key] && view.scale > 1) {
       event.preventDefault();
+      stopMotion();
       const [x, y] = moves[event.key];
-      setView(constrain({ ...view, x: view.x + x, y: view.y + y }));
+      const view = viewRef.current;
+      updateView(constrain({ ...view, x: view.x + x, y: view.y + y }));
     }
     if (event.key === 'Home') {
       event.preventDefault();
-      setView(initialView);
+      selectStop(0);
     }
   }
 
@@ -113,7 +203,7 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
         <div
           className={`travel-map-canvas${view.scale > 1 ? ' is-zoomed' : ''}`}
           role="group"
-          aria-label="World travel map. Use the zoom buttons, then drag or use arrow keys to pan. Home resets the view."
+          aria-label="World travel map. Use the zoom buttons, then drag or use arrow keys to pan. Home returns to the first visit without changing zoom."
           tabIndex={0}
           onPointerDown={startDrag}
           onPointerMove={moveDrag}
@@ -125,55 +215,46 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
           <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-title ${id}-description`}>
             <title id={`${id}-title`}>World travel map</title>
             <desc id={`${id}-description`}>
-              {stops.length ? 'The current city, next destination, and connecting route are highlighted. Use the previous and next visit buttons to follow the route chronologically.' : 'World outline. No visits have been added yet.'}
+              {stops.length ? 'One marker shows the current position. Previous and next move smoothly between visits; Play follows the route chronologically.' : 'World outline. No visits have been added yet.'}
             </desc>
             <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
               <path className="travel-ocean" d={oceanPath} />
               <path className="travel-graticule" d={gridPath} vectorEffect="non-scaling-stroke" />
               <path className="travel-land" d={landPath} vectorEffect="non-scaling-stroke" />
-              <path className="travel-route" d={routePath(stops)} vectorEffect="non-scaling-stroke" />
-              {next && <>
-                <path className="travel-route travel-route-halo" d={nextRoute} vectorEffect="non-scaling-stroke" />
-                <path className="travel-route travel-route-active" d={nextRoute} vectorEffect="non-scaling-stroke" />
-              </>}
+              <path className="travel-route" d={fullRoute} vectorEffect="non-scaling-stroke" />
             </g>
           </svg>
-          {visibleMarkers.map(({ key, indices, index, stop, x, y, active, upcoming }) => {
-            const visits = indices.map(i => i + 1).join(', ');
-            return (
-              <button
-                key={key}
-                type="button"
-                className={`travel-marker${active ? ' is-selected' : ''}${upcoming ? ' is-next' : ''}`}
-                style={{ left: `${x}%`, top: `${y}%` }}
-                aria-label={`${active ? 'Current stop. ' : ''}${upcoming ? 'Next destination. ' : ''}${stop.label}. ${indices.length > 1 ? `Visits ${visits}; activate to cycle through visits` : `Visit ${visits}`}.`}
-                aria-pressed={active}
-                onClick={() => selectStop(active ? indices[(indices.indexOf(selected) + 1) % indices.length] : index)}
-              >
-                <span className="travel-marker-dot" aria-hidden="true" />
-              </button>
-            );
-          })}
-          <TravelMapLabels labels={labels} />
+          {current && point && <span
+            className="travel-position"
+            aria-hidden="true"
+            style={{ left: `${x}%`, top: `${y}%` }}
+          />}
+          {displayedStop && visible && <TravelMapLabel label={displayedStop.label} x={x} y={y} />}
         </div>
         <div className="travel-map-toolbar">
           <div className="travel-map-controls travel-visit-controls" role="group" aria-label="Travel visits" aria-describedby={`${id}-status`}>
             <button type="button" onClick={() => selectStop(selected - 1)} disabled={!current || selected === 0} aria-label="Previous visit" title="Previous visit">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>
             </button>
-            <span className="travel-visit-count" aria-hidden="true">{current ? selected + 1 : 0} / {stops.length}</span>
+            <span className="travel-visit-count" aria-hidden="true">
+              <span className="travel-visit-number" style={{ width: `${String(stops.length).length}ch` }}>{current ? selected + 1 : 0}</span> / {stops.length}
+            </span>
             <button type="button" onClick={() => selectStop(selected + 1)} disabled={!current || selected === stops.length - 1} aria-label="Next visit" title="Next visit">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+            </button>
+            <button type="button" onClick={() => selectStop(stops.length - 1)} disabled={!current || (selected === stops.length - 1 && atCurrent && !motion)} title="Jump to the latest visit">Now</button>
+            <button type="button" onClick={() => selectStop(0)} disabled={!current || (selected === 0 && atCurrent && !motion && !playing)} title="Return to visit 1">Reset</button>
+            <button type="button" className="travel-play-button" onClick={togglePlayback} disabled={stops.length < 2} title={playing ? 'Stop playback' : selected === stops.length - 1 && atCurrent ? 'Play from visit 1' : 'Play from current visit'}>
+              {playing ? 'Stop' : 'Play'}
             </button>
           </div>
           <div className="travel-map-controls" role="group" aria-label="Map zoom">
             <button type="button" onClick={() => zoom(1 / 1.5)} disabled={view.scale === 1} aria-label="Zoom out">−</button>
             <button type="button" onClick={() => zoom(1.5)} disabled={view.scale === 8} aria-label="Zoom in">+</button>
-            <button type="button" onClick={() => setView(initialView)} disabled={view.scale === 1}>Reset</button>
           </div>
         </div>
         <figcaption id={`${id}-status`} className="travel-map-status" aria-live="polite" aria-atomic="true">
-          {current ? `Visit ${selected + 1} of ${stops.length} · ${current.label}${next ? ` · Next: ${next.label}` : ' · Final visit'}` : 'No visits added yet.'}
+          {current ? `Visit ${selected + 1} of ${stops.length} · ${current.label}${motion ? ` · Moving to ${stops[motion.index]?.label ?? current.label}` : ''}${selected === stops.length - 1 ? ' · Final visit' : ''}` : 'No visits added yet.'}
         </figcaption>
       </figure>
     </div>

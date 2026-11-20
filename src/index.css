@@ -1883,73 +1883,25 @@ section:last-child,
 .travel-route {
   fill: none;
   stroke: var(--map-marker);
-  stroke-width: 1.5;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.18;
+  opacity: 0.35;
 }
 
-.travel-route-halo {
-  stroke: var(--map-background);
-  stroke-width: 5;
-  opacity: 1;
-}
-
-.travel-route-active {
-  stroke-width: 2.5;
-  opacity: 1;
-}
-
-.travel-marker {
+.travel-position {
   position: absolute;
-  transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
-  border: 0;
-  padding: 0;
-  background: none;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  color: var(--map-text);
-  font-family: var(--font-main);
-}
-
-.travel-marker-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--map-marker);
-  border: 1px solid var(--map-background);
-  opacity: 0.4;
-}
-
-.travel-marker.is-next {
-  z-index: 1;
-}
-
-.travel-marker.is-selected {
   z-index: 2;
-}
-
-.travel-marker.is-selected .travel-marker-dot,
-.travel-marker.is-next .travel-marker-dot {
   width: 12px;
   height: 12px;
-  border: 2px solid var(--map-marker);
-  box-shadow: 0 0 0 2px var(--map-background);
-  opacity: 1;
-}
-
-.travel-marker.is-next .travel-marker-dot {
-  background: var(--map-background);
-}
-
-.travel-marker.is-selected .travel-marker-dot {
+  border-radius: 50%;
   background: var(--map-marker);
+  box-shadow: 0 0 0 2px var(--map-background);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-.travel-map-labels {
+.travel-map-label-layer {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -2017,6 +1969,15 @@ section:last-child,
   cursor: pointer;
 }
 
+.travel-visit-controls {
+  flex-wrap: wrap;
+}
+
+.travel-map-controls .travel-play-button {
+  width: 3.5rem;
+  flex-shrink: 0;
+}
+
 .travel-map-controls button:disabled {
   opacity: 0.4;
   cursor: default;
@@ -2033,12 +1994,18 @@ section:last-child,
 }
 
 .travel-visit-count {
+  flex-shrink: 0;
   min-width: 4.5ch;
   color: var(--text-secondary);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
+}
+
+.travel-visit-number {
+  display: inline-block;
+  text-align: right;
 }
 
 .travel-map button:hover:not(:disabled) {
@@ -2049,4 +2016,10 @@ section:last-child,
 .travel-map-canvas:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
+}
+
+@media (max-width: 480px) {
+  .travel-map-toolbar {
+    padding-inline: 0.5rem;
+  }
 }
