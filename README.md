@@ -30,6 +30,9 @@ If Node is not on PATH, prefix commands with
 - `AGENTS.md`: repository guidance for coding agents.
 
 The build generates pages, a 404 page, `sitemap.xml`, and `robots.txt` in `dist/`.
-`dist-ssr/` is a temporary build artifact. GitHub Actions runs lint and build,
-then deploys `dist/` on pushes to `main`. No runtime server is required.
+`dist-ssr/` is a temporary build artifact. On pushes to `main`, GitHub Actions
+runs lint and build, uploads `dist/` as `github-pages`, then deploys it in a
+dependent job. The artifact is retained for seven days so a failed deployment
+can be retried without rebuilding. If it has expired, start a new run from the
+Actions tab. No runtime server is required.
 React hydrates the static pages; old `/#/…` links are migrated to page paths.
