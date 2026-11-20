@@ -127,8 +127,10 @@ There are no separate country or region fields, and provider wording is not
 added to the displayed name. `"Frankfurt, Germany"` uses the previously
 verified Frankfurt coordinates and shows **Frankfurt**.
 
-The array order controls the route; the map starts at visit 1 (the earliest
-visit), and its counter uses chronological visit numbers.
+The array order controls the route; the map opens at the latest recorded
+visit (the first entry in this file), showing your current recorded position.
+The oldest entry is the origin: the counter displays **Origin** there and
+keeps chronological position numbers for the remaining entries.
 
 Coordinates resolve automatically during `npm run build` / `npm run check`
 and when you open or edit the site with `npm run dev`. New location labels
@@ -145,26 +147,26 @@ never rewrites your labels or adds administrative wording to the map.
 
 Repeat an entry to show a return visit. The map displays one position marker
 and one city name. While moving, the label shows the destination city.
-At rest, it shows the selected city. Previous and Next move the marker
-smoothly to the adjacent visit; the counter changes as soon as you select a visit.
+Stopping mid-route keeps the destination label; after arrival, it shows the
+selected city. Previous and Next move the marker smoothly to the adjacent visit; the counter changes as soon as you select a visit.
 If you click again during movement, the marker redirects from its current
 position. Repeat visits remain separate steps, including visits to the
 same city.
 
-Reset returns to visit 1; Now selects the latest visit. Both animate to the
+Reset returns to the origin; Now selects the latest visit. Both animate to the
 selected city while keeping the current zoom level. These buttons sit
 beside the visit arrows; the separate − and + buttons control zoom.
 Play continues from the current visit and advances once per second, using
 the same marker and smooth movement. At the final visit, Play restarts at
-visit 1. Stop freezes the position; Play resumes the unfinished movement
-from that position. Manual selection or panning stops playback. Play is
+the origin. Stop freezes the position and keeps the destination label; Play
+resumes the unfinished movement from that position. Manual selection or panning stops playback. Play is
 disabled when there are fewer than two visits.
 
 All route segments have the same visibility, with no active-leg highlight. Lines follow
 great-circle arcs, including across the Pacific; they indicate visit order,
 not exact flight or road itineraries. The map pans smoothly when zoomed in.
 Zoom with the buttons and drag to pan; keyboard users can focus the map and
-use arrow keys, or press Home to return to visit 1 without changing zoom.
+use arrow keys, or press Home to return to the origin without changing zoom.
 Reduced-motion preferences skip movement animations and keep playback at
 one visit per second. An empty array (`[]`) shows an empty world map;
 a single entry shows its position and city name.

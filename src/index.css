@@ -1995,17 +1995,11 @@ section:last-child,
 
 .travel-visit-count {
   flex-shrink: 0;
-  min-width: 4.5ch;
   color: var(--text-secondary);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
-}
-
-.travel-visit-number {
-  display: inline-block;
-  text-align: right;
 }
 
 .travel-map button:hover:not(:disabled) {

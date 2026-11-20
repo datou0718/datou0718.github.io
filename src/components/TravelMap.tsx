@@ -43,16 +43,16 @@ function centerOn(position: Coordinates | null, scale: number): View {
 
 export default function TravelMap({ stops }: { stops: TravelStop[] }) {
   const id = useId();
-  const [selectedIndex, setSelected] = useState(0);
+  const [selectedIndex, setSelected] = useState(() => Math.max(0, stops.length - 1));
   const [playing, setPlaying] = useState(false);
   const [motion, setMotion] = useState<Motion | null>(null);
-  const [position, setPosition] = useState<Coordinates | null>(() => stops[0] ? coordinates(stops[0]) : null);
+  const [position, setPosition] = useState<Coordinates | null>(() => stops[selectedIndex] ? coordinates(stops[selectedIndex]) : null);
   const positionRef = useRef(position);
   const frameRef = useRef(0);
-  const pausedVisitRef = useRef<number | null>(null);
+  const [pausedVisit, setPausedVisit] = useState<number | null>(null);
   const selected = Math.min(selectedIndex, Math.max(0, stops.length - 1));
   const current = stops[selected];
-  const displayedStop = stops[motion?.index ?? selected];
+  const displayedStop = stops[motion?.index ?? pausedVisit ?? selected];
   const atCurrent = !!current && !!position && samePosition(position, coordinates(current));
   const [view, setView] = useState(initialView);
   const viewRef = useRef(initialView);
@@ -117,7 +117,7 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
   }, [motion, stops, updatePosition, updateView]);
 
   function stopMotion() {
-    if (motion) pausedVisitRef.current = motion.index;
+    if (motion) setPausedVisit(motion.index);
     window.cancelAnimationFrame(frameRef.current);
     setMotion(null);
     setPlaying(false);
@@ -127,7 +127,7 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
     const target = stops[index];
     if (!target) return;
     stopMotion();
-    pausedVisitRef.current = null;
+    setPausedVisit(null);
     setSelected(index);
     const to = coordinates(target);
     const from = positionRef.current;
@@ -143,11 +143,11 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
     stopMotion();
     if (playing || stops.length < 2) return;
     const restart = selected === stops.length - 1 && atCurrent;
-    const index = restart ? 1 : pausedVisitRef.current ?? selected + 1;
+    const index = restart ? 1 : motion?.index ?? pausedVisit ?? selected + 1;
     const target = stops[index];
     const from = restart ? coordinates(stops[0]) : positionRef.current;
     if (!target || !from) return;
-    pausedVisitRef.current = null;
+    setPausedVisit(null);
     if (restart) {
       setSelected(0);
       updatePosition(from);
@@ -203,7 +203,7 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
         <div
           className={`travel-map-canvas${view.scale > 1 ? ' is-zoomed' : ''}`}
           role="group"
-          aria-label="World travel map. Use the zoom buttons, then drag or use arrow keys to pan. Home returns to the first visit without changing zoom."
+          aria-label="World travel map. Use the zoom buttons, then drag or use arrow keys to pan. Home returns to the origin without changing zoom."
           tabIndex={0}
           onPointerDown={startDrag}
           onPointerMove={moveDrag}
@@ -236,15 +236,15 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
             <button type="button" onClick={() => selectStop(selected - 1)} disabled={!current || selected === 0} aria-label="Previous visit" title="Previous visit">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>
             </button>
-            <span className="travel-visit-count" aria-hidden="true">
-              <span className="travel-visit-number" style={{ width: `${String(stops.length).length}ch` }}>{current ? selected + 1 : 0}</span> / {stops.length}
+            <span className="travel-visit-count" aria-hidden="true" style={{ width: `${Math.max(6, String(stops.length).length * 2 + 3)}ch` }}>
+              {current && selected === 0 ? 'Origin' : `${current ? selected + 1 : 0} / ${stops.length}`}
             </span>
             <button type="button" onClick={() => selectStop(selected + 1)} disabled={!current || selected === stops.length - 1} aria-label="Next visit" title="Next visit">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
             </button>
             <button type="button" onClick={() => selectStop(stops.length - 1)} disabled={!current || (selected === stops.length - 1 && atCurrent && !motion)} title="Jump to the latest visit">Now</button>
-            <button type="button" onClick={() => selectStop(0)} disabled={!current || (selected === 0 && atCurrent && !motion && !playing)} title="Return to visit 1">Reset</button>
-            <button type="button" className="travel-play-button" onClick={togglePlayback} disabled={stops.length < 2} title={playing ? 'Stop playback' : selected === stops.length - 1 && atCurrent ? 'Play from visit 1' : 'Play from current visit'}>
+            <button type="button" onClick={() => selectStop(0)} disabled={!current || (selected === 0 && atCurrent && !motion && !playing)} title="Return to origin">Reset</button>
+            <button type="button" className="travel-play-button" onClick={togglePlayback} disabled={stops.length < 2} title={playing ? 'Stop playback' : selected === stops.length - 1 && atCurrent ? 'Play from origin' : selected === 0 && atCurrent && !motion && pausedVisit === null ? 'Play from origin' : 'Play from current position'}>
               {playing ? 'Stop' : 'Play'}
             </button>
           </div>
@@ -254,7 +254,7 @@ export default function TravelMap({ stops }: { stops: TravelStop[] }) {
           </div>
         </div>
         <figcaption id={`${id}-status`} className="travel-map-status" aria-live="polite" aria-atomic="true">
-          {current ? `Visit ${selected + 1} of ${stops.length} · ${current.label}${motion ? ` · Moving to ${stops[motion.index]?.label ?? current.label}` : ''}${selected === stops.length - 1 ? ' · Final visit' : ''}` : 'No visits added yet.'}
+          {current ? `${selected === 0 ? 'Origin' : `Visit ${selected + 1} of ${stops.length}`} · ${current.label}${motion ? ` · Moving to ${displayedStop?.label ?? current.label}` : pausedVisit !== null ? ` · Paused; destination ${displayedStop?.label ?? current.label}` : ''}${selected === stops.length - 1 ? ' · Final visit' : ''}` : 'No visits added yet.'}
         </figcaption>
       </figure>
     </div>
